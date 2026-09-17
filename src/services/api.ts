@@ -37,13 +37,12 @@ import {
 } from '../types/tourflow';
 import { travelerSession } from './travelerSession';
 
-const API_BASE = '/api';
-
+const API_BASE = import.meta.env.VITE_API_BASE_URL;
 export const TourFlowApi = {
   /** Last HTTP status seen on a traveler auth check (lets the auth store
    * distinguish an explicit 401 rejection from a network failure). */
   lastAuthStatus: 0 as number,
-  /** Wired by the traveler auth store; invoked on 401s from traveler APIs. */
+  /** Wired by the traveler auth store; invoked on 401s from traveler APIs. /
   onUnauthorized: null as null | (() => void),
 
   /** Authorization header for the logged-in traveler, if any. */
@@ -100,11 +99,7 @@ export const TourFlowApi = {
     });
     if (res.status === 401) {
       this.lastAuthStatus = 401;
-      try {
-        this.onUnauthorized?.();
-      } catch {
-        // never break callers because of the expiry hook
-      }
+     
       const err = await res.json().catch(() => ({ detail: 'Session expired. Please sign in again.' }));
       throw new Error(err.detail || 'Session expired. Please sign in again.');
     }
