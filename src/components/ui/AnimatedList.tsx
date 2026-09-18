@@ -10,7 +10,8 @@ const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick, conta
     const el = ref.current;
     if (!el) return;
     if (!isHovering || cursorY == null) {
-      setStyleState({ scale: 1, opacity: 1 });
+      // Avoid a state update (and re-render) when already at rest values.
+      setStyleState((prev) => (prev.scale === 1 && prev.opacity === 1 ? prev : { scale: 1, opacity: 1 }));
       return;
     }
     const rect = el.getBoundingClientRect();
@@ -26,7 +27,10 @@ const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick, conta
     else clampedScale = scale;
     clampedScale = Math.min(1.20, Math.max(1, clampedScale));
     const opacity = 1 - t * 0.14;
-    setStyleState({ scale: clampedScale, opacity: Math.max(0.88, opacity) });
+    const next = { scale: clampedScale, opacity: Math.max(0.88, opacity) };
+    // Same values → keep previous object identity so we don't re-render in a
+    // hover/scroll-driven update cycle.
+    setStyleState((prev) => (Math.abs(prev.scale - next.scale) < 1e-4 && Math.abs(prev.opacity - next.opacity) < 1e-4 ? prev : next));
   }, [cursorY, isHovering]);
 
   useEffect(() => {
@@ -48,7 +52,8 @@ const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick, conta
       else clampedScale = scale;
       clampedScale = Math.min(1.20, Math.max(1, clampedScale));
       const opacity = 1 - t * 0.14;
-      setStyleState({ scale: clampedScale, opacity: Math.max(0.88, opacity) });
+      const next = { scale: clampedScale, opacity: Math.max(0.88, opacity) };
+      setStyleState((prev) => (Math.abs(prev.scale - next.scale) < 1e-4 && Math.abs(prev.opacity - next.opacity) < 1e-4 ? prev : next));
     };
     container.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('resize', onScroll);

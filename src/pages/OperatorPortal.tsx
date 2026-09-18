@@ -13,8 +13,6 @@ import { OperatorAssignmentFlow } from '../components/operator/dashboard/Operato
 import { OperatorBookings } from '../components/operator/bookings/OperatorBookings';
 import { OperatorAlerts } from '../components/operator/alerts/OperatorAlerts';
 import { OperatorCommunications } from '../components/operator/communications/OperatorCommunications';
-import { OperatorAiAssistant } from '../components/operator/ai/OperatorAiAssistant';
-import { OperatorAnalytics } from '../components/operator/analytics/OperatorAnalytics';
 import { TourFlowApi } from '../services/api';
 import type { Trip, TripApprovalState } from '../types/tourflow';
 
@@ -33,7 +31,6 @@ export const OperatorPortal: React.FC<{ onSwitchToTraveler: () => void }> = ({ o
   const [allTrips, setAllTrips] = useState<Trip[]>([]);
   const [bookings, setBookings] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
-  const [analyticsData, setAnalyticsData] = useState<any | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
   const [lastVersion, setLastVersion] = useState(0);
@@ -41,8 +38,8 @@ export const OperatorPortal: React.FC<{ onSwitchToTraveler: () => void }> = ({ o
   const fetchAllData = useCallback(async () => {
     setIsSyncing(true);
     try {
-      const [dash, tripsList, bkgs, alrts, analytics] = await Promise.all([TourFlowApi.getOperatorDashboard(), TourFlowApi.getTrips(), TourFlowApi.getOperatorBookings(), TourFlowApi.getOperatorAlerts(), TourFlowApi.getOperatorAnalytics()]);
-      if (dash) setDashboardData(dash); if (tripsList) setAllTrips(tripsList); if (bkgs) setBookings(bkgs); if (alrts) setAlerts(alrts); if (analytics) setAnalyticsData(analytics);
+      const [dash, tripsList, bkgs, alrts] = await Promise.all([TourFlowApi.getOperatorDashboard(), TourFlowApi.getTrips(), TourFlowApi.getOperatorBookings(), TourFlowApi.getOperatorAlerts()]);
+      if (dash) setDashboardData(dash); if (tripsList) setAllTrips(tripsList); if (bkgs) setBookings(bkgs); if (alrts) setAlerts(alrts);
       if (selectedTripId) { const t = await TourFlowApi.getTrip(selectedTripId); if (t) setSelectedTrip(t); }
       setLastSyncTime(new Date());
     } catch (e) { console.error(e); } finally { setIsSyncing(false); }
@@ -87,8 +84,6 @@ export const OperatorPortal: React.FC<{ onSwitchToTraveler: () => void }> = ({ o
                 {currentTab === 'assignment_center' && (focusOpsTripId && allTrips.some(t => t.id === focusOpsTripId) ? <OperatorAssignmentFlow trip={allTrips.find(t => t.id === focusOpsTripId) as Trip} onNavigateService={t => setCurrentTab(t)} onPipelineChange={async () => setApprovals((await TourFlowApi.getTripApprovals()) || [])} /> : <div style={{ padding: 32, textAlign: 'center', borderRadius: 'var(--radius-lg)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>No Trip Selected — open a confirmed trip from Dashboard.</div>)}
                 {currentTab === 'alerts' && <OperatorAlerts alerts={alerts} onResolveAlert={async id => { await TourFlowApi.resolveAlert(id); fetchAllData(); }} onSelectTrip={id => setSelectedTripId(id)} />}
                 {currentTab === 'communications' && <OperatorCommunications trips={allTrips} operatorName={operatorUser.name} onSelectTrip={id => setSelectedTripId(id)} />}
-                {currentTab === 'ai_assistant' && <OperatorAiAssistant trips={allTrips} onSelectTrip={id => setSelectedTripId(id)} />}
-                {currentTab === 'analytics' && <OperatorAnalytics analyticsData={analyticsData} />}
               </>
             )}
           </div>

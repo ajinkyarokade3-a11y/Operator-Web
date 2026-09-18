@@ -37,7 +37,31 @@ import {
 } from '../types/tourflow';
 import { travelerSession } from './travelerSession';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL;
+const RAW_API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
+// Frontend-first fix: never build a relative "undefined/..." URL (Vite would
+// answer with index.html → "<!doctype ..." JSON SyntaxError). Fall back to the
+// local FastAPI base so the browser always calls the actual backend API.
+export const API_BASE = (RAW_API_BASE ? RAW_API_BASE.replace(/\/+$/, '') : '') || 'http://localhost:8000/api';
+
+/** Parse JSON only when the backend actually returned JSON. HTML (e.g. the
+ * Vite SPA fallback) becomes a clear error instead of a raw SyntaxError. */
+async function parseJsonSafe<T>(res: Response): Promise<T> {
+  const contentType = res.headers.get('content-type') || '';
+  const text = await res.text();
+  const looksJson = contentType.includes('application/json') || /^[\s]*[{[]/.test(text);
+  if (!looksJson) {
+    const snippet = text.replace(/\s+/g, ' ').trim().slice(0, 120);
+    throw new Error(
+      `Expected JSON from ${res.url} but received ${contentType || 'unknown content-type'} (status ${res.status}): ${snippet || '(empty response)'}`,
+    );
+  }
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    const snippet = text.replace(/\s+/g, ' ').trim().slice(0, 120);
+    throw new Error(`Invalid JSON from ${res.url} (status ${res.status}): ${snippet}`);
+  }
+}
 export const TourFlowApi = {
   /** Last HTTP status seen on a traveler auth check (lets the auth store
    * distinguish an explicit 401 rejection from a network failure). */
@@ -63,7 +87,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Signup failed' }));
       throw new Error(err.detail || 'Signup failed');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async travelerLogin(email: string, password: string): Promise<TravelerAuthResponse> {
@@ -76,7 +100,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Login failed' }));
       throw new Error(err.detail || 'Login failed');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getTravelerMe(): Promise<TravelerUser> {
@@ -88,7 +112,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Session invalid' }));
       throw new Error(err.detail || 'Session invalid');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   /** Traveler-scoped request: 401s surface session expiry exactly once. */
@@ -107,7 +131,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Request failed' }));
       throw new Error(err.detail || 'Request failed');
     }
-    return (await res.json()) as T;
+    return await parseJsonSafe<T>(res);
   },
 
   // Persistent "My Trips" (PostgreSQL snapshots; canonical trip store).
@@ -137,7 +161,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Could not open trip' }));
       throw new Error(err.detail || 'Could not open trip');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Health & Diagnostics
@@ -146,7 +170,7 @@ export const TourFlowApi = {
     if (!res.ok) {
       throw new Error(`Health check failed with status ${res.status}`);
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Destinations
@@ -156,7 +180,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return [];
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<Destination[]>(res);
+    } catch {
+      return [];
+    }
   },
 
   async getDestinationById(idOrSlug: string): Promise<Destination> {
@@ -164,7 +192,7 @@ export const TourFlowApi = {
     if (!res.ok) {
       throw new Error(`Destination not found: ${idOrSlug}`);
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Catalog items
@@ -176,7 +204,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return [];
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<Hotel[]>(res);
+    } catch {
+      return [];
+    }
   },
 
   async getActivities(destinationId?: string, category?: string): Promise<Activity[]> {
@@ -187,7 +219,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return [];
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<Activity[]>(res);
+    } catch {
+      return [];
+    }
   },
 
   async getTransport(destinationId?: string, type?: string): Promise<TransportOption[]> {
@@ -198,7 +234,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return [];
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<TransportOption[]>(res);
+    } catch {
+      return [];
+    }
   },
 
   // Trips (Central Entity)
@@ -227,7 +267,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to create trip' }));
       throw new Error(err.detail || 'Failed to create trip');
     }
-    const trip: CreatedTripResult = await res.json();
+    const trip: CreatedTripResult = await parseJsonSafe(res);
     // Authenticated travelers get the complete trip persisted to their
     // account automatically (best-effort: creation itself already succeeded).
     if (travelerSession.getToken()) {
@@ -252,7 +292,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to update transport' }));
       throw new Error(err.detail || 'Failed to update transport');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async changeAccommodation(tripId: string, accommodationId: string): Promise<Trip> {
@@ -265,7 +305,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to update accommodation' }));
       throw new Error(err.detail || 'Failed to update accommodation');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async changeDailyAccommodation(tripId: string, dayNumber: number, accommodationId: string): Promise<Trip> {
@@ -278,7 +318,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to update day accommodation' }));
       throw new Error(err.detail || 'Failed to update day accommodation');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getTrip(tripId: string): Promise<Trip> {
@@ -287,7 +327,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Trip not found' }));
       throw new Error(err.detail || `Trip not found with id: ${tripId}`);
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async confirmTrip(tripId: string, userId?: string): Promise<{
@@ -302,7 +342,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to confirm trip' }));
       throw new Error(err.detail || 'Failed to confirm trip');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async updateTrip(tripId: string, payload: Partial<Trip>): Promise<Trip> {
@@ -315,7 +355,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to update trip' }));
       throw new Error(err.detail || 'Failed to update trip');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getTripPreferences(tripId: string): Promise<TripPreference> {
@@ -324,7 +364,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Preferences not found' }));
       throw new Error(err.detail || 'Failed to get trip preferences');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async updateTripPreferences(tripId: string, preferences: Partial<TripPreference>): Promise<TripPreference> {
@@ -337,7 +377,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to update preferences' }));
       throw new Error(err.detail || 'Failed to update trip preferences');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getTrips(filters?: { status?: string; search?: string; operator_id?: string }): Promise<Trip[]> {
@@ -347,7 +387,7 @@ export const TourFlowApi = {
       if (filters?.search) params.append('search', filters.search);
       if (filters?.operator_id) params.append('operator_id', filters.operator_id);
       const res = await fetch(`${API_BASE}/trips?${params.toString()}`);
-      if (res.ok) return await res.json();
+      if (res.ok) return await parseJsonSafe(res);
     } catch {
       // Return empty array on network or server failure
     }
@@ -363,7 +403,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to trigger disruption' }));
       throw new Error(err.detail || 'Failed to trigger disruption');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getImpactAnalysis(tripId: string, disruption?: any): Promise<any> {
@@ -376,7 +416,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to compute impact analysis' }));
       throw new Error(err.detail || 'Failed to compute impact analysis');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getAiReplanOptions(tripId: string, disruption?: any): Promise<any> {
@@ -389,7 +429,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to fetch replan alternatives' }));
       throw new Error(err.detail || 'Failed to fetch replan alternatives');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async applyReplan(tripId: string, alternativeId: string, notes?: string): Promise<any> {
@@ -402,7 +442,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to apply replan' }));
       throw new Error(err.detail || 'Failed to apply replan');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async acceptTripRequest(tripId: string): Promise<any> {
@@ -414,7 +454,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to accept trip request' }));
       throw new Error(err.detail || 'Failed to accept trip request');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async declineTripRequest(tripId: string): Promise<any> {
@@ -426,7 +466,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to decline trip request' }));
       throw new Error(err.detail || 'Failed to decline trip request');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getOperatorDashboard(): Promise<any> {
@@ -434,7 +474,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return null;
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe(res);
+    } catch {
+      return null;
+    }
   },
 
   async getOperatorVendors(): Promise<OperatorVendor[]> {
@@ -442,7 +486,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return [];
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<OperatorVendor[]>(res);
+    } catch {
+      return [];
+    }
   },
 
   async toggleVendor(vendorId: string): Promise<any> {
@@ -454,7 +502,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to toggle vendor status' }));
       throw new Error(err.detail || 'Failed to toggle vendor status');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getOperatorBookings(): Promise<any[]> {
@@ -462,7 +510,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return [];
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<any[]>(res);
+    } catch {
+      return [];
+    }
   },
 
   // Read-only booking readiness. Creating a reservation remains an explicit trip action.
@@ -476,7 +528,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to get booking recommendations' }));
       throw new Error(err.detail || 'Failed to get booking recommendations');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async chatWithAssistant(tripId: string, message: string): Promise<any> {
@@ -489,7 +541,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Assistant request failed' }));
       throw new Error(err.detail || 'Assistant request failed');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async updateBookingAction(bookingId: string, action: 'confirm' | 'cancel' | 'rebook'): Promise<any> {
@@ -502,7 +554,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to update booking' }));
       throw new Error(err.detail || 'Failed to update booking');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getOperatorAlerts(): Promise<any[]> {
@@ -510,7 +562,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return [];
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<any[]>(res);
+    } catch {
+      return [];
+    }
   },
 
   async resolveAlert(alertId: string): Promise<any> {
@@ -522,7 +578,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to resolve alert' }));
       throw new Error(err.detail || 'Failed to resolve alert');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getOperatorAnalytics(): Promise<any> {
@@ -530,7 +586,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return null;
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe(res);
+    } catch {
+      return null;
+    }
   },
 
   async getSyncVersion(): Promise<{ version: number; timestamp: string; trips_count: number }> {
@@ -538,7 +598,11 @@ export const TourFlowApi = {
     if (!res.ok) {
       return { version: 0, timestamp: new Date().toISOString(), trips_count: 0 };
     }
-    return await res.json();
+    try {
+      return await parseJsonSafe<{ version: number; timestamp: string; trips_count: number }>(res);
+    } catch {
+      return { version: 0, timestamp: new Date().toISOString(), trips_count: 0 };
+    }
   },
 
   async operatorLogin(email: string, password: string): Promise<{ success: boolean; user: any; detail?: string }> {
@@ -551,7 +615,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Authentication failed' }));
       throw new Error(err.detail || 'Invalid operator credentials');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async operatorAiAssistant(message: string, contextTripId?: string): Promise<{ reply: string; timestamp: string; suggested_actions: string[] }> {
@@ -564,7 +628,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'AI Operations Assistant error' }));
       throw new Error(err.detail || 'AI Operations Assistant error');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // AI Services
@@ -588,7 +652,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to process AI chat message' }));
       throw new Error(err.detail || 'Failed to process AI chat message');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async aiExtractPreferences(textPrompt: string): Promise<Record<string, any>> {
@@ -601,7 +665,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to extract preferences' }));
       throw new Error(err.detail || 'Failed to extract preferences');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async aiReplan(tripId: string, triggerEvent: { type: string; severity: string; title: string; description: string }): Promise<any> {
@@ -614,7 +678,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to generate replan' }));
       throw new Error(err.detail || 'Failed to generate replan');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Itinerary Activity Real-Time Modification Handlers
@@ -641,7 +705,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to add itinerary activity' }));
       throw new Error(err.detail || 'Failed to add itinerary activity');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async deleteItineraryActivity(tripId: string, itemId: string): Promise<Trip> {
@@ -654,7 +718,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to delete itinerary activity' }));
       throw new Error(err.detail || 'Failed to delete itinerary activity');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async deleteItineraryItem(tripId: string, itemId: string): Promise<Trip> {
@@ -669,7 +733,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to delete trip' }));
       throw new Error(err.detail || 'Failed to delete trip');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async deleteItinerary(itineraryId: string): Promise<{ success: boolean; message?: string }> {
@@ -692,7 +756,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to swap itinerary activity' }));
       throw new Error(err.detail || 'Failed to swap itinerary activity');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async editItineraryActivity(tripId: string, params: {
@@ -712,7 +776,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to edit itinerary activity' }));
       throw new Error(err.detail || 'Failed to edit itinerary activity');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async getPossibleOptions(destName: string, tripId?: string): Promise<PossibleOptionItem[]> {
@@ -720,7 +784,7 @@ export const TourFlowApi = {
       const q = new URLSearchParams({ destination: destName });
       if (tripId) q.append('trip_id', tripId);
       const res = await fetch(`${API_BASE}/possible-options?${q.toString()}`);
-      if (res.ok) return await res.json();
+      if (res.ok) return await parseJsonSafe(res);
     } catch {
       // return empty array on failure
     }
@@ -737,7 +801,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to toggle itinerary activity' }));
       throw new Error(err.detail || 'Failed to toggle itinerary activity');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async addDayLeg(tripId: string): Promise<Trip> {
@@ -749,7 +813,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to add day leg' }));
       throw new Error(err.detail || 'Failed to add day leg');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async removeDayLeg(tripId: string, dayNumber: number): Promise<Trip> {
@@ -762,7 +826,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to remove day leg' }));
       throw new Error(err.detail || 'Failed to remove day leg');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async changeTripTransport(tripId: string, transportId: string): Promise<Trip> {
@@ -775,7 +839,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to change transport' }));
       throw new Error(err.detail || 'Failed to change transport');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async changeTripAccommodation(tripId: string, accommodationId: string): Promise<Trip> {
@@ -788,7 +852,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to change accommodation' }));
       throw new Error(err.detail || 'Failed to change accommodation');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Live hotel search (SerpApi via backend; the key never reaches the browser).
@@ -814,7 +878,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Hotel search failed' }));
       throw new Error(err.detail || 'Hotel search failed');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Live place photos (SerpApi Google Images via backend; key never reaches browser).
@@ -832,7 +896,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Place image lookup failed' }));
       throw new Error(err.detail || 'Place image lookup failed');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // ---- Operations consoles (canonical state in FastAPI + database) ----
@@ -846,7 +910,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: `Operations request failed (${res.status})` }));
       throw new Error(err.detail || `Operations request failed (${res.status})`);
     }
-    return (await res.json()) as T;
+    return await parseJsonSafe<T>(res);
   },
 
   // Accommodation operations
@@ -1053,7 +1117,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Restaurant search failed' }));
       throw new Error(err.detail || 'Restaurant search failed');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Persist a traveler-selected live hotel against the trip itinerary.
@@ -1082,7 +1146,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to save hotel selection' }));
       throw new Error(err.detail || 'Failed to save hotel selection');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   async changeDayAccommodation(tripId: string, dayNumber: number, accommodationId: string): Promise<Trip> {
@@ -1095,7 +1159,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to change day accommodation' }));
       throw new Error(err.detail || 'Failed to change day accommodation');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // Lock Booking Choice
@@ -1119,7 +1183,7 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Failed to lock in booking choice' }));
       throw new Error(err.detail || 'Failed to lock in booking choice');
     }
-    return await res.json();
+    return await parseJsonSafe(res);
   },
 
   // User Abstract Preferences Storage Logic

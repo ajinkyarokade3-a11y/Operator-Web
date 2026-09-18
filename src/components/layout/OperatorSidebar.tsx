@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import AnimatedList from '../ui/AnimatedList';
 import { 
   LayoutDashboard, 
@@ -10,8 +10,6 @@ import {
   Car,
   Compass,
   AlertTriangle, 
-  Bot,
-  TrendingUp, 
   Sparkles,
   Layers,
   PhoneCall,
@@ -29,9 +27,7 @@ export type OperatorNavTab =
   | 'vendors' 
   | 'assignment_center'
   | 'alerts' 
-  | 'communications'
-  | 'ai_assistant'
-  | 'analytics';
+  | 'communications';
 
 interface OperatorSidebarProps {
   currentTab: OperatorNavTab;
@@ -48,7 +44,9 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
   activeToursCount,
   pendingRequestsCount,
 }) => {
-  const navItems = [
+  // Memoized so AnimatedList (effects keyed on `items`/`onItemSelect`) does not
+  // re-subscribe on every parent render. Same items, same behavior.
+  const navItems = useMemo(() => [
     {
       id: 'dashboard' as OperatorNavTab,
       label: 'Dashboard',
@@ -110,19 +108,9 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
       label: 'Communications',
       icon: MessageSquare,
     },
-    {
-      id: 'ai_assistant' as OperatorNavTab,
-      label: 'AI Operations Assistant',
-      icon: Bot,
-      badge: 'PRO',
-      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-    },
-    {
-      id: 'analytics' as OperatorNavTab,
-      label: 'Analytics',
-      icon: TrendingUp,
-    },
-  ];
+  ], [unresolvedAlertCount, activeToursCount, pendingRequestsCount]);
+
+  const handleItemSelect = useCallback((item: any) => onSelectTab(item.id), [onSelectTab]);
 
   return (
     <aside className="sidebar w-64 bg-slate-900 border-r border-slate-800 flex flex-col p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', height: '100%', overflow: 'hidden' }}>
@@ -155,7 +143,7 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
           enableArrowNavigation={true}
           displayScrollbar={true}
           className="sidebar-animated-list"
-          onItemSelect={(item: any) => onSelectTab(item.id)}
+          onItemSelect={handleItemSelect}
           renderItem={(item: any) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
