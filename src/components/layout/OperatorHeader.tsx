@@ -1,16 +1,5 @@
 import React from 'react';
-import { 
-  Compass, 
-  Activity, 
-  Radio, 
-  ArrowLeftRight, 
-  Zap, 
-  Bell, 
-  ShieldCheck, 
-  RefreshCw,
-  LogOut,
-  AlertTriangle
-} from 'lucide-react';
+import { Compass, RefreshCw, LogOut, AlertTriangle } from 'lucide-react';
 
 interface OperatorHeaderProps {
   operatorUser: { email: string; name: string; role: string; operator_name: string };
@@ -24,113 +13,72 @@ interface OperatorHeaderProps {
 }
 
 export const OperatorHeader: React.FC<OperatorHeaderProps> = ({
-  operatorUser,
-  isSyncing,
-  lastSyncTime,
-  onManualSync,
-  onTriggerDisruptionDemo,
-  onSwitchToTraveler,
-  onLogout,
-  unresolvedAlertCount,
+  operatorUser, isSyncing, onManualSync, onTriggerDisruptionDemo, onSwitchToTraveler, onLogout, unresolvedAlertCount,
 }) => {
   return (
-    <header className="bg-slate-900 border-b border-slate-800 text-slate-100 sticky top-0 z-40 shadow-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Brand & Agency Badge */}
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-900/30">
-              <Compass className="w-6 h-6" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="text-base font-bold text-white tracking-tight">TourFlow AI</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  OPERATOR HUB
-                </span>
-              </div>
-              <div className="flex items-center space-x-2 text-xs text-slate-400">
-                <span className="font-medium text-slate-300">{operatorUser.operator_name}</span>
-                <span className="w-1 h-1 rounded-full bg-slate-600" />
-                <span className="text-slate-400">Kullu & North India Hub</span>
-              </div>
-            </div>
+    <header
+      style={{
+        flexShrink: 0, height: 56, zIndex: 40,
+        background: 'linear-gradient(180deg, var(--color-surface) 0%, var(--color-background-secondary) 100%)',
+        borderBottom: '1px solid var(--color-border)',
+        backdropFilter: 'blur(var(--blur-glass))',
+        boxShadow: 'var(--shadow-subtle)',
+      }}
+    >
+      <div style={{ maxWidth: 1440, margin: '0 auto', padding: '0 20px', height: 56, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div style={{
+            width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-secondary) 100%)',
+            boxShadow: '0 0 16px var(--color-accent-glow)', color: '#fff', flexShrink: 0,
+          }}>
+            <Compass size={18} />
           </div>
-
-          {/* Quick Actions & Live Sync */}
-          <div className="flex items-center space-x-3">
-            {/* Live Database Sync Indicator */}
-            <div className="hidden md:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700/80 text-xs">
-              <div className="flex items-center space-x-1.5">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                </span>
-                <span className="text-emerald-400 font-medium font-mono text-[11px]">POSTGRES SYNCED</span>
-              </div>
-              <button
-                id="btn-manual-sync-operator"
-                onClick={onManualSync}
-                title="Force refresh with shared database"
-                className="text-slate-400 hover:text-white transition-colors p-1"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`} />
-              </button>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 15, color: 'var(--color-text-primary)', letterSpacing: 'var(--tracking-tight)' }}>WanderAI</span>
+              <span style={{ fontSize: 9, fontWeight: 700, letterSpacing: 'var(--tracking-wider)', textTransform: 'uppercase', padding: '2px 6px', borderRadius: 999, background: 'var(--color-accent-soft)', color: 'var(--color-accent)', border: '1px solid var(--color-accent-border)' }}>Operator</span>
             </div>
-
-            {/* Disruption Simulator Button */}
-            <button
-              id="btn-simulate-disruption-header"
-              onClick={onTriggerDisruptionDemo}
-              title="Simulate severe weather wind shear at Solang Valley (Day 3 Paragliding)"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-all shadow-sm group"
-            >
-              <Zap className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-              <span className="hidden sm:inline">Simulate Weather Disruption</span>
-              <span className="sm:hidden">Simulate</span>
-            </button>
-
-            {/* Alerts Count */}
-            {unresolvedAlertCount > 0 && (
-              <div className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
-                <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                <span>{unresolvedAlertCount} Alert{unresolvedAlertCount > 1 ? 's' : ''}</span>
-              </div>
-            )}
-
-            {/* Switch to Traveler View */}
-            <button
-              id="btn-switch-to-traveler-view-header"
-              onClick={onSwitchToTraveler}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-semibold transition-colors"
-            >
-              <ArrowLeftRight className="w-3.5 h-3.5 text-sky-400" />
-              <span>Traveler View</span>
-            </button>
-
-            {/* Operator Profile */}
-            <div className="hidden lg:flex items-center space-x-2 pl-2 border-l border-slate-800">
-              <div className="w-8 h-8 rounded-full bg-emerald-700 flex items-center justify-center text-xs font-bold text-white border border-emerald-500/40">
-                RS
-              </div>
-              <div className="text-left">
-                <div className="text-xs font-semibold text-slate-200">{operatorUser.name}</div>
-                <div className="text-[10px] text-emerald-400">{operatorUser.role}</div>
-              </div>
+            <div style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: 'var(--color-text-secondary)', fontWeight: 600 }}>{operatorUser.operator_name}</span>
+              <span style={{ width: 3, height: 3, borderRadius: 999, background: 'var(--color-border-strong)' }} />
+              <span>North Hub</span>
             </div>
-
-            {/* Logout */}
-            <button
-              id="btn-operator-logout"
-              onClick={onLogout}
-              title="Sign out of Operator Portal"
-              className="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition-colors"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
           </div>
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', borderRadius: 10, background: 'var(--color-surface-elevated)', border: '1px solid var(--color-border)', fontSize: 11 }}>
+            <span style={{ position: 'relative', display: 'inline-flex', width: 8, height: 8 }}>
+              <span style={{ position: 'absolute', inset: 0, borderRadius: 999, background: 'var(--color-success)', opacity: 0.35, animation: 'ping 1.5s infinite' }} />
+              <span style={{ position: 'relative', width: 8, height: 8, borderRadius: 999, background: 'var(--color-success)', display: 'inline-block' }} />
+            </span>
+            <span style={{ color: 'var(--color-success)', fontWeight: 700, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', fontSize: 10 }}>Live</span>
+            <button id="btn-manual-sync-operator" onClick={onManualSync} title="Sync" style={{ background: 'transparent', border: 'none', color: 'var(--color-text-muted)', cursor: 'pointer', display: 'inline-flex' }}>
+              <RefreshCw size={14} style={{ animation: isSyncing ? 'spin 0.8s linear infinite' : undefined }} />
+            </button>
+          </div>
+
+          {unresolvedAlertCount > 0 && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 8px', borderRadius: 8, background: 'var(--color-danger-soft)', border: '1px solid var(--color-danger-border)', color: 'var(--color-danger)', fontSize: 11, fontWeight: 700 }}>
+              <AlertTriangle size={13} /> {unresolvedAlertCount}
+            </span>
+          )}
+
+          <div style={{ width: 1, height: 24, background: 'var(--color-border)', margin: '0 2px' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 999, background: 'linear-gradient(135deg,var(--color-accent) 0%, var(--color-accent-secondary) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 11 }}>
+              {operatorUser.name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase()}
+            </div>
+          </div>
+
+          <button id="btn-operator-logout" onClick={onLogout} title="Sign out" style={{ width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid transparent', color: 'var(--color-text-muted)', cursor: 'pointer' }}>
+            <LogOut size={16} />
+          </button>
+        </div>
       </div>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}@keyframes ping{75%,100%{transform:scale(2);opacity:0}}`}</style>
     </header>
   );
 };

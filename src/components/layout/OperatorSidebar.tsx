@@ -1,4 +1,5 @@
 import React from 'react';
+import AnimatedList from '../ui/AnimatedList';
 import { 
   LayoutDashboard, 
   Inbox,
@@ -124,8 +125,8 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col justify-between p-4 min-h-[calc(100vh-4rem)]">
-      <div className="space-y-6">
+    <aside className="sidebar w-64 bg-slate-900 border-r border-slate-800 flex flex-col p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', height: '100%', overflow: 'hidden' }}>
+      <div className="space-y-4" style={{ flexShrink: 0 }}>
         {/* Operations Hub Info Card */}
         <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5">
           <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
@@ -141,23 +142,30 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
             Direct dispatch authority for Himachal, Ladakh & Kashmir sectors.
           </p>
         </div>
+        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3">
+          Operations Menu
+        </div>
+      </div>
 
-        {/* Navigation items */}
-        <nav className="space-y-1">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3 mb-2">
-            Operations Menu
-          </div>
-          {navItems.map((item) => {
+      {/* Animated scrollable navigation */}
+      <div style={{ flex: 1, minHeight: 0, marginTop: 8, marginBottom: 8, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <AnimatedList
+          items={navItems}
+          showGradients={true}
+          enableArrowNavigation={true}
+          displayScrollbar={true}
+          className="sidebar-animated-list"
+          onItemSelect={(item: any) => onSelectTab(item.id)}
+          renderItem={(item: any) => {
             const Icon = item.icon;
             const isActive = currentTab === item.id;
             return (
               <button
-                key={item.id}
                 id={`nav-item-${item.id}`}
                 onClick={() => onSelectTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/40'
+                    ? 'bg-slate-800 text-white border border-slate-700'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
                 }`}
               >
@@ -165,7 +173,6 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                   <span>{item.label}</span>
                 </div>
-
                 {item.badge && (
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded-full font-mono font-medium border ${
@@ -177,8 +184,8 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
                 )}
               </button>
             );
-          })}
-        </nav>
+          }}
+        />
       </div>
 
       {/* Footer Support Widget */}

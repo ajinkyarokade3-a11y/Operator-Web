@@ -152,11 +152,11 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
                 <button
                   id={`btn-open-workspace-from-itinerary-${activeTrip.id}`}
                   onClick={() => onSelectTrip(activeTrip.id)}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow flex items-center space-x-1.5 transition-colors"
+                  style={{ padding: '8px 14px', borderRadius: 10, background: 'var(--color-surface-elevated)', color: '#fff', fontWeight: 600, fontSize: 12, border: '1px solid var(--color-border)', display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}
                 >
-                  <Sparkles className="w-4 h-4 text-amber-300" />
+                  <Sparkles size={14} style={{ color: 'var(--color-text-muted)' }} />
                   <span>Open Full Tour Center</span>
-                  <ChevronRight className="w-4 h-4" />
+                  <ChevronRight size={14} />
                 </button>
               </div>
             </div>
