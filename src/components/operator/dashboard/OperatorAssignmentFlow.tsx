@@ -174,7 +174,7 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
   ];
 
   if (loading) {
-    return <div className="text-center py-12 text-slate-500 text-sm">Loading assignment center...</div>;
+    return <div className="text-center py-12 text-neutral-500 text-sm">Loading assignment center...</div>;
   }
   if (error || !pipeline) {
     return (
@@ -203,8 +203,8 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
 
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight">Trip Assignment Center</h1>
-        <p className="text-sm text-slate-400 mt-0.5">
-          <span className="font-mono text-sky-400">{trip.id}</span> · {trip.title} · all services tracked under one Trip ID
+        <p className="text-sm text-neutral-400 mt-0.5">
+          <span className="font-mono text-neutral-200">{trip.id}</span> · {trip.title} · all services tracked under one Trip ID
         </p>
       </div>
 
@@ -214,14 +214,14 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
         </div>
       )}
 
-      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-2">
+      <div className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-2">
         <div className="flex items-center justify-between text-xs font-bold">
-          <span className="text-slate-300">Stage: {stageLabels[stage]}</span>
-          <span className="text-slate-400 font-mono">{progress.assigned}/{progress.total} services assigned</span>
+          <span className="text-neutral-300">Stage: {stageLabels[stage]}</span>
+          <span className="text-neutral-400 font-mono">{progress.assigned}/{progress.total} services assigned</span>
         </div>
-        <div className="w-full bg-slate-950 rounded-full h-2.5 overflow-hidden border border-slate-800">
+        <div className="w-full bg-neutral-950 rounded-full h-2.5 overflow-hidden border border-neutral-800">
           <div
-            className="bg-gradient-to-r from-emerald-600 to-teal-400 h-full rounded-full transition-all"
+            className="bg-gradient-to-r from-neutral-200 to-neutral-500 h-full rounded-full transition-all"
             style={{ width: `${(progress.assigned / progress.total) * 100}%` }}
           />
         </div>
@@ -235,7 +235,7 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
               (idx === 4 && Boolean(services?.activities.assigned)) ||
               (idx === 5 && Boolean(approval?.finalized));
             return (
-              <span key={label} className={`px-2 py-0.5 rounded-full border ${done ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-slate-950 text-slate-500 border-slate-800'}`}>
+              <span key={label} className={`px-2 py-0.5 rounded-full border ${done ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-neutral-950 text-neutral-500 border-neutral-800'}`}>
                 {done ? '✓ ' : '○ '}{label}
               </span>
             );
@@ -245,16 +245,16 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
 
       <div className="flex flex-wrap gap-2">
         {!approval?.approved && (
-          <button onClick={() => setReviewOpen(true)} className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold">
+          <button onClick={() => setReviewOpen(true)} className="px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold">
             Review Trip
           </button>
         )}
         {approval?.approved && !approval.assignment_started && !approval.finalized && (
-          <button onClick={doAccept} disabled={working} className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
+          <button onClick={doAccept} disabled={working} className="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold disabled:opacity-50">
             {working ? 'Starting...' : 'Accept & Assign →'}
           </button>
         )}
-        <button onClick={() => { refresh(); }} className="px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1">
+        <button onClick={() => { refresh(); }} className="px-4 py-2.5 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-bold flex items-center gap-1">
           <RefreshCw className="w-3.5 h-3.5" /> Refresh Pipeline
         </button>
       </div>
@@ -272,7 +272,7 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
           {
             key: 'transport' as const,
             title: 'Transport',
-            icon: <Car className="w-4 h-4 text-sky-400" />,
+            icon: <Car className="w-4 h-4 text-neutral-200" />,
             done: Boolean(services?.transport.assigned),
             status: services?.transport.status || 'pending',
             action: 'Assign Transport',
@@ -286,7 +286,7 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
             action: 'Assign Activities',
           },
         ].map((card) => (
-          <div key={card.key} className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+          <div key={card.key} className="p-4 rounded-2xl bg-neutral-900 border border-neutral-800 space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-bold text-white">
                 {card.icon}<span>{card.title}</span>
@@ -299,12 +299,12 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
               onClick={() => onNavigateService(card.key)}
               disabled={!approval?.assignment_started || approval?.finalized}
               title={!approval?.assignment_started ? 'Accept & Assign first (operator approval required)' : undefined}
-              className="w-full px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 disabled:opacity-40 flex items-center justify-center gap-1.5"
+              className="w-full px-3 py-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold border border-neutral-700 disabled:opacity-40 flex items-center justify-center gap-1.5"
             >
               <span>{card.action}</span><ArrowRight className="w-3.5 h-3.5" />
             </button>
             {!approval?.assignment_started && (
-              <p className="text-[11px] text-slate-500">Locked until Accept &amp; Assign.</p>
+              <p className="text-[11px] text-neutral-500">Locked until Accept &amp; Assign.</p>
             )}
           </div>
         ))}
@@ -315,7 +315,7 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
           onClick={() => setFinalOpen(true)}
           disabled={!approval?.assignment_started || approval?.finalized || progress.assigned < progress.total}
           title={progress.assigned < progress.total ? 'All required services must be assigned first' : undefined}
-          className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-40"
+          className="px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold disabled:opacity-40"
         >
           {approval?.finalized ? 'Trip Finalized ✓' : 'Final Review →'}
         </button>
@@ -330,23 +330,23 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
 
       {reviewOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-2xl w-full space-y-4 max-h-[85vh] overflow-y-auto">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 max-w-2xl w-full space-y-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white">Review Trip — {trip.id}</h3>
-              <button onClick={() => setReviewOpen(false)} className="p-1 text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setReviewOpen(false)} className="p-1 text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Traveler party</div><div className="text-slate-200 font-bold">{trip.traveler_count} travelers ({trip.preferences?.travel_companions || trip.travel_type})</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Dates / Budget</div><div className="text-slate-200 font-bold">{trip.start_date?.slice(0, 10)} → {trip.end_date?.slice(0, 10)} · ₹{(trip.total_budget || 0).toLocaleString()}</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Hotels required</div><div className="text-slate-200 font-bold">{trip.selected_accommodation?.name || `${(trip.itinerary || []).filter((i) => i.item_type === 'hotel').length} hotel slots`} · {Math.max(1, (trip.duration_days || 2) - 1)} nights</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Transport required</div><div className="text-slate-200 font-bold">{trip.selected_transport ? `${trip.selected_transport.operator} (${trip.selected_transport.mode})` : `${trip.origin || '?'} → ${trip.destination?.name || '?'}`}</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 col-span-1 sm:col-span-2"><div className="text-slate-500 uppercase text-[10px] font-bold">Activities required ({travelerActivities.length})</div><div className="text-slate-200 font-semibold">{travelerActivities.slice(0, 6).map((a) => a.title).join(' · ') || 'None selected'}</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 col-span-1 sm:col-span-2"><div className="text-slate-500 uppercase text-[10px] font-bold">Special requests</div><div className="text-slate-200 font-semibold">{trip.preferences?.special_requests || '—'}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Traveler party</div><div className="text-neutral-200 font-bold">{trip.traveler_count} travelers ({trip.preferences?.travel_companions || trip.travel_type})</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Dates / Budget</div><div className="text-neutral-200 font-bold">{trip.start_date?.slice(0, 10)} → {trip.end_date?.slice(0, 10)} · ₹{(trip.total_budget || 0).toLocaleString()}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Hotels required</div><div className="text-neutral-200 font-bold">{trip.selected_accommodation?.name || `${(trip.itinerary || []).filter((i) => i.item_type === 'hotel').length} hotel slots`} · {Math.max(1, (trip.duration_days || 2) - 1)} nights</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Transport required</div><div className="text-neutral-200 font-bold">{trip.selected_transport ? `${trip.selected_transport.operator} (${trip.selected_transport.mode})` : `${trip.origin || '?'} → ${trip.destination?.name || '?'}`}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800 col-span-1 sm:col-span-2"><div className="text-neutral-500 uppercase text-[10px] font-bold">Activities required ({travelerActivities.length})</div><div className="text-neutral-200 font-semibold">{travelerActivities.slice(0, 6).map((a) => a.title).join(' · ') || 'None selected'}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800 col-span-1 sm:col-span-2"><div className="text-neutral-500 uppercase text-[10px] font-bold">Special requests</div><div className="text-neutral-200 font-semibold">{trip.preferences?.special_requests || '—'}</div></div>
             </div>
-            <div className="text-xs text-slate-400">Estimated partner cost updates live as services are assigned; availability is validated server-side on every assignment.</div>
+            <div className="text-xs text-neutral-400">Estimated partner cost updates live as services are assigned; availability is validated server-side on every assignment.</div>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setReviewOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancel</button>
-              <button onClick={doApprove} disabled={working} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
+              <button onClick={() => setReviewOpen(false)} className="px-4 py-2 rounded-xl bg-neutral-800 text-neutral-300 text-xs font-bold">Cancel</button>
+              <button onClick={doApprove} disabled={working} className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold disabled:opacity-50">
                 {working ? 'Approving...' : 'Approve & Continue'}
               </button>
             </div>
@@ -356,35 +356,35 @@ export const OperatorAssignmentFlow: React.FC<OperatorAssignmentFlowProps> = ({
 
       {finalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-2xl w-full space-y-4 max-h-[85vh] overflow-y-auto">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 max-w-2xl w-full space-y-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white">Final Review — {trip.id}</h3>
-              <button onClick={() => setFinalOpen(false)} className="p-1 text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setFinalOpen(false)} className="p-1 text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Traveler</div><div className="text-slate-200 font-bold">{trip.traveler_count} travelers · {trip.preferences?.travel_companions || trip.travel_type}</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Itinerary</div><div className="text-slate-200 font-bold">{trip.destination?.name} · {trip.duration_days} days · {(trip.itinerary || []).length} items</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Hotels</div><div className="text-slate-200 font-bold">{hotelRow?.hotel?.name || '—'} {hotelRow ? `· ${hotelRow.rooms ?? '?'} rooms` : ''}</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800"><div className="text-slate-500 uppercase text-[10px] font-bold">Transport</div><div className="text-slate-200 font-bold">{transportRow ? `${transportRow.vehicle?.name || '?'} + ${transportRow.driver?.name || '?'}` : '—'}</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 col-span-1 sm:col-span-2"><div className="text-slate-500 uppercase text-[10px] font-bold">Activities ({activityAssignments.filter((a: any) => a.status === 'confirmed').length} confirmed)</div><div className="text-slate-200 font-semibold">{activityAssignments.filter((a: any) => a.status === 'confirmed').map((a: any) => a.activity?.title || a.activity_id).join(' · ') || 'None'}</div></div>
-              <div className="bg-slate-950/60 rounded-xl p-3 border border-slate-800 col-span-1 sm:col-span-2">
-                <div className="text-slate-500 uppercase text-[10px] font-bold">Financial summary</div>
-                <div className="text-slate-200 font-semibold font-mono">Traveler price ₹{travelerPrice.toLocaleString()} · Partner cost ₹{partnerCost.toLocaleString()} · Margin ₹{(travelerPrice - partnerCost).toLocaleString()}</div>
-                <div className="text-slate-500 text-[11px]">Taxes/fees included in partner rates (not separately tracked) · Transport at vendor contract rate (not in system)</div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Traveler</div><div className="text-neutral-200 font-bold">{trip.traveler_count} travelers · {trip.preferences?.travel_companions || trip.travel_type}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Itinerary</div><div className="text-neutral-200 font-bold">{trip.destination?.name} · {trip.duration_days} days · {(trip.itinerary || []).length} items</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Hotels</div><div className="text-neutral-200 font-bold">{hotelRow?.hotel?.name || '—'} {hotelRow ? `· ${hotelRow.rooms ?? '?'} rooms` : ''}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800"><div className="text-neutral-500 uppercase text-[10px] font-bold">Transport</div><div className="text-neutral-200 font-bold">{transportRow ? `${transportRow.vehicle?.name || '?'} + ${transportRow.driver?.name || '?'}` : '—'}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800 col-span-1 sm:col-span-2"><div className="text-neutral-500 uppercase text-[10px] font-bold">Activities ({activityAssignments.filter((a: any) => a.status === 'confirmed').length} confirmed)</div><div className="text-neutral-200 font-semibold">{activityAssignments.filter((a: any) => a.status === 'confirmed').map((a: any) => a.activity?.title || a.activity_id).join(' · ') || 'None'}</div></div>
+              <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-800 col-span-1 sm:col-span-2">
+                <div className="text-neutral-500 uppercase text-[10px] font-bold">Financial summary</div>
+                <div className="text-neutral-200 font-semibold font-mono">Traveler price ₹{travelerPrice.toLocaleString()} · Partner cost ₹{partnerCost.toLocaleString()} · Margin ₹{(travelerPrice - partnerCost).toLocaleString()}</div>
+                <div className="text-neutral-500 text-[11px]">Taxes/fees included in partner rates (not separately tracked) · Transport at vendor contract rate (not in system)</div>
               </div>
             </div>
             <div className="space-y-1.5">
               {checks.map((c) => (
                 <div key={c.label} className="flex items-center gap-2 text-xs">
                   {c.ok ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> : <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />}
-                  <span className={c.ok ? 'text-slate-300' : 'text-rose-300 font-bold'}>{c.ok ? '✓' : '✗'} {c.label}</span>
+                  <span className={c.ok ? 'text-neutral-300' : 'text-rose-300 font-bold'}>{c.ok ? '✓' : '✗'} {c.label}</span>
                 </div>
               ))}
             </div>
-            <p className="text-xs text-slate-400">Finalizing locks assignments and notifies the traveler plus assigned partners.</p>
+            <p className="text-xs text-neutral-400">Finalizing locks assignments and notifies the traveler plus assigned partners.</p>
             <div className="flex justify-end gap-2">
-              <button onClick={() => setFinalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Go Back</button>
-              <button onClick={doFinalize} disabled={working} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
+              <button onClick={() => setFinalOpen(false)} className="px-4 py-2 rounded-xl bg-neutral-800 text-neutral-300 text-xs font-bold">Go Back</button>
+              <button onClick={doFinalize} disabled={working} className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold disabled:opacity-50">
                 {working ? 'Finalizing...' : 'Finalize Trip'}
               </button>
             </div>

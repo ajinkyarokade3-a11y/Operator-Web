@@ -26,12 +26,12 @@ const CATEGORY_META: Record<TripMessageCategory, { label: string; icon: any; bad
   general: {
     label: 'General',
     icon: MessageSquare,
-    badge: 'bg-slate-500/15 text-slate-300 border-slate-500/30',
+    badge: 'bg-neutral-500/15 text-neutral-300 border-neutral-500/30',
   },
   operational: {
     label: 'Operational',
     icon: ClipboardList,
-    badge: 'bg-sky-500/15 text-sky-300 border-sky-500/30',
+    badge: 'bg-neutral-500/15 text-neutral-300 border-neutral-500/30',
   },
   hotel: {
     label: 'Hotel',
@@ -178,7 +178,7 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
         className="flex-1 min-h-[280px] max-h-[460px] overflow-y-auto space-y-3 pr-1"
       >
         {isLoading ? (
-          <div className="flex items-center justify-center py-12 text-slate-400 text-sm">
+          <div className="flex items-center justify-center py-12 text-neutral-400 text-sm">
             <Loader2 className="w-5 h-5 animate-spin mr-2" />
             Loading messages…
           </div>
@@ -186,17 +186,17 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
           <div className="bg-rose-950/40 border border-rose-500/30 rounded-2xl p-6 text-center">
             <AlertTriangle className="w-6 h-6 text-rose-300 mx-auto mb-2" />
             <div className="font-bold text-white text-sm">Messages unavailable</div>
-            <p className="text-xs text-slate-300 mt-1">{loadError}</p>
+            <p className="text-xs text-neutral-300 mt-1">{loadError}</p>
             <button
               onClick={() => loadMessages(activeCategory)}
-              className="mt-3 px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 transition-colors"
+              className="mt-3 px-3.5 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700 transition-colors"
             >
               Retry
             </button>
           </div>
         ) : messages.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-            <MessageSquare className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center text-neutral-400">
+            <MessageSquare className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
             <div className="font-bold text-white text-sm">No messages yet</div>
             <p className="text-xs mt-1">
               {activeCategory === 'all'
@@ -214,12 +214,12 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
                 className={`rounded-2xl p-4 border ${
                   message.is_urgent
                     ? 'bg-rose-950/30 border-rose-500/50'
-                    : 'bg-slate-900 border-slate-800'
+                    : 'bg-neutral-900 border-neutral-800'
                 }`}
               >
                 <div className="flex items-center justify-between gap-2 flex-wrap">
                   <div className="flex items-center space-x-2">
-                    <span className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-[11px] font-bold text-slate-200">
+                    <span className="w-7 h-7 rounded-full bg-neutral-800 border border-neutral-700 flex items-center justify-center text-[11px] font-bold text-neutral-200">
                       {(message.operator_name || 'O').trim().charAt(0).toUpperCase()}
                     </span>
                     <span className="text-xs font-bold text-white">{message.operator_name}</span>
@@ -235,11 +235,11 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
                       </span>
                     )}
                   </div>
-                  <span className="text-[11px] text-slate-500 font-mono">
+                  <span className="text-[11px] text-neutral-500 font-mono">
                     {formatTimestamp(message.created_at)}
                   </span>
                 </div>
-                <p className="text-xs text-slate-200 leading-relaxed mt-2 whitespace-pre-wrap">
+                <p className="text-xs text-neutral-200 leading-relaxed mt-2 whitespace-pre-wrap">
                   {message.body}
                 </p>
               </div>
@@ -249,8 +249,8 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
       </div>
 
       {/* Composer */}
-      <div className="mt-3 bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3">
-        <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+      <div className="mt-3 bg-neutral-950/60 border border-neutral-800 rounded-2xl p-4 space-y-3">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">
           New Message
         </div>
         <textarea
@@ -260,14 +260,14 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
           rows={3}
           maxLength={2000}
           placeholder={`Log an internal note for trip #${tripId}… (traveler-invisible)`}
-          className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 resize-y"
+          className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2.5 text-xs text-white placeholder:text-neutral-500 focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400/30 resize-y"
         />
         <div className="flex flex-wrap items-center gap-2">
           <select
             aria-label="Message category"
             value={draftCategory}
             onChange={(e) => setDraftCategory(e.target.value as TripMessageCategory)}
-            className="bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500/60"
+            className="bg-neutral-900 border border-neutral-700 rounded-lg px-2.5 py-2 text-xs text-neutral-200 focus:outline-none focus:border-neutral-400"
           >
             {TRIP_MESSAGE_CATEGORIES.map((category) => (
               <option key={category} value={category}>
@@ -275,7 +275,7 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
               </option>
             ))}
           </select>
-          <label className="flex items-center space-x-1.5 text-xs text-slate-300 cursor-pointer select-none">
+          <label className="flex items-center space-x-1.5 text-xs text-neutral-300 cursor-pointer select-none">
             <input
               type="checkbox"
               checked={draftUrgent}
@@ -284,14 +284,14 @@ export const TripCommunicationsPanel: React.FC<TripCommunicationsPanelProps> = (
             />
             <span>Mark as urgent</span>
           </label>
-          <span className="text-[11px] text-slate-500 font-mono ml-auto">
+          <span className="text-[11px] text-neutral-500 font-mono ml-auto">
             {draft.trim().length}/2000
           </span>
           <button
             id={`btn-send-message-${tripId}`}
             onClick={handleSend}
             disabled={!draft.trim() || isSending}
-            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white text-xs font-bold rounded-xl shadow flex items-center space-x-1.5 transition-colors"
+            className="px-4 py-2 bg-white hover:bg-neutral-200 disabled:bg-neutral-800 disabled:text-neutral-500 text-black text-xs font-bold rounded-xl shadow flex items-center space-x-1.5 transition-colors"
           >
             {isSending ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -326,8 +326,8 @@ const FilterChip: React.FC<{
     onClick={onClick}
     className={`px-3 py-1.5 rounded-lg text-xs font-semibold border whitespace-nowrap transition-colors ${
       active
-        ? 'bg-emerald-600 text-white border-emerald-500'
-        : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-slate-200 hover:border-slate-700'
+        ? 'bg-white text-black border-emerald-500'
+        : 'bg-neutral-900 text-neutral-400 border-neutral-800 hover:text-neutral-200 hover:border-neutral-700'
     }`}
   >
     {label}

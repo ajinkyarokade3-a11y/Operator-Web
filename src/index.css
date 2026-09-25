@@ -16,8 +16,13 @@
   :focus-visible { outline: none; box-shadow: var(--focus-ring); border-color: var(--color-border-focus); }
   ::selection { background: var(--color-accent-soft); color: var(--color-text-primary); }
 }
-.surface { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-subtle); }
-.surface-elevated { background: var(--color-surface-elevated); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-elevated); }
+/* Elevation utilities — one rung per purpose. Prefer these over ad-hoc
+   shadow/color combos. Page → sunken → base → elevated → interactive → overlay. */
+.surface { background: var(--color-surface); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-subtle); }
+.surface-sunken { background: var(--color-surface-sunken); border: 1px solid var(--color-border-subtle); border-radius: var(--radius-lg); box-shadow: var(--shadow-inset); }
+.surface-elevated { background: var(--color-surface-elevated); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-standard); }
+.surface-interactive { background: var(--color-surface-interactive); border: 1px solid var(--color-border-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-subtle); }
+.surface-overlay { background: var(--color-surface-overlay); border: 1px solid var(--color-border-strong); border-radius: var(--radius-xl); box-shadow: var(--shadow-overlay); }
 .surface-hover:hover { background: var(--color-surface-hover); border-color: var(--color-border-strong); transition: background var(--transition-normal), border-color var(--transition-normal); }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -33,9 +38,9 @@
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 /* Global cleanup: tinted box backgrounds → neutral surface. Large containers lose emerald/amber/rose/cyan/slate tints; small pill badges (rounded-full) keep semantic color. */
-div[class*="rounded-xl"].bg-slate-900, div[class*="rounded-2xl"].bg-slate-900,
-div[class*="rounded-xl"].bg-slate-950, div[class*="rounded-2xl"].bg-slate-950,
-div[class*="rounded-xl"].bg-slate-800, div[class*="rounded-2xl"].bg-slate-800,
+div[class*="rounded-xl"].bg-neutral-900, div[class*="rounded-2xl"].bg-neutral-900,
+div[class*="rounded-xl"].bg-neutral-950, div[class*="rounded-2xl"].bg-neutral-950,
+div[class*="rounded-xl"].bg-neutral-800, div[class*="rounded-2xl"].bg-neutral-800,
 div[class*="rounded-xl"][class*="bg-emerald"], div[class*="rounded-2xl"][class*="bg-emerald"],
 div[class*="rounded-xl"][class*="bg-amber"], div[class*="rounded-2xl"][class*="bg-amber"],
 div[class*="rounded-xl"][class*="bg-rose"], div[class*="rounded-2xl"][class*="bg-rose"],
@@ -43,10 +48,20 @@ div[class*="rounded-xl"][class*="bg-sky"], div[class*="rounded-2xl"][class*="bg-
   background-color: var(--color-surface) !important;
   border-color: var(--color-border) !important;
 }
-[class*="bg-slate-900"]:not([class*="rounded-full"]):not(.leaflet-container),
-[class*="bg-slate-950"]:not([class*="rounded-full"]),
-[class*="bg-slate-800"]:not([class*="rounded-full"]) {
+[class*="bg-neutral-900"]:not([class*="rounded-full"]):not(.leaflet-container):not(input):not(select):not(textarea),
+[class*="bg-neutral-950"]:not([class*="rounded-full"]):not(input):not(select):not(textarea),
+[class*="bg-neutral-800"]:not([class*="rounded-full"]):not(input):not(select):not(textarea) {
   background-color: var(--color-surface) !important;
+}
+/* Form fields stay carved-in: sunken rung + inset shadow instead of flat surface. */
+input[class*="bg-neutral"], select[class*="bg-neutral"], textarea[class*="bg-neutral"] {
+  background-color: var(--color-surface-sunken) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: var(--shadow-input);
+}
+input[class*="bg-neutral"]:focus, select[class*="bg-neutral"]:focus, textarea[class*="bg-neutral"]:focus {
+  border-color: var(--color-border-focus) !important;
+  box-shadow: var(--shadow-input), var(--focus-ring);
 }
 /* Inline-style tinted boxes (large containers) → neutral surface. Targets div/section/tr with soft backgrounds, preserves span badges. */
 div[style*="var(--color-accent-soft)"],
@@ -73,27 +88,31 @@ tr[style*="var(--color-"][style*="-border"] {
 span[style*="var(--color-"][style*="-soft"] {
   /* badges remain tinted via inline style — no override */
 }
-/* Border shine — every surface box gets cursor-following border highlight */
+/* Navigation depth — active item sits on the interactive rung with a faint
+   top highlight; hover lifts one rung. More specific than the flattening
+   rule above so the hierarchy survives it. */
+button[id^="nav-item-"]:hover {
+  background-color: var(--color-surface-elevated) !important;
+}
+button[id^="nav-item-"][class*="bg-neutral-800"] {
+  background-color: var(--color-surface-interactive) !important;
+  border-color: var(--color-border-strong) !important;
+  box-shadow: var(--highlight-top-subtle), 0 1px 2px rgba(0, 0, 0, 0.4) !important;
+}
+/* Sidebar separation — a hairline inner edge instead of a heavy border. */
+aside.sidebar {
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.03);
+}
+/* Border shine — every surface box gets cursor-following border highlight.
+   Kept deliberately faint: a whisper of light, never gloss. */
 .surface, div[style*="var(--color-surface)"], div[class*="rounded-xl"], div[class*="rounded-2xl"], section[class*="rounded"] {
   position: relative;
   overflow: hidden;
 }
 .specular-box { position: relative; overflow: hidden; }
-.specular-box::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: 0;
-  padding: 1px;
-  background: radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.92), rgba(255,255,255,0.45) 36%, transparent 62%);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  transition: opacity 220ms ease;
-}
-.specular-box:hover::before { opacity: 1; }
+/* Single shared cursor-highlight — one definition for every surface box.
+   Deliberately faint: a whisper of light, never gloss. */
+.specular-box::before,
 .surface::before, div[style*="var(--color-surface)"]::before, div[class*="rounded-xl"]::before, div[class*="rounded-2xl"]::before {
   content: "";
   position: absolute;
@@ -102,12 +121,13 @@ span[style*="var(--color-"][style*="-soft"] {
   pointer-events: none;
   opacity: 0;
   padding: 1px;
-  background: radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.88), rgba(255,255,255,0.40) 34%, transparent 62%);
+  background: radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.30), rgba(255,255,255,0.13) 34%, transparent 62%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   transition: opacity 220ms ease;
 }
+.specular-box:hover::before,
 .surface:hover::before, div[style*="var(--color-surface)"]:hover::before, div[class*="rounded-xl"]:hover::before, div[class*="rounded-2xl"]:hover::before {
   opacity: 1;
 }
@@ -123,6 +143,7 @@ a[class*="bg-"]:not(.specular-button) {
   background-image: none !important;
   border-color: var(--color-border) !important;
   color: #fff !important;
+  box-shadow: var(--shadow-subtle);
 }
 button:not(.specular-button) span, [role="button"]:not(.specular-button) span { color: #fff !important; position: relative; z-index: 1; }
 button:not(.specular-button)::after,
@@ -133,7 +154,7 @@ button:not(.specular-button)::after,
   border-radius: inherit;
   pointer-events: none;
   opacity: 0;
-  background: radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.32), transparent 62%);
+  background: radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.12), transparent 62%);
   transition: opacity 220ms ease;
 }
 button:not(.specular-button):hover::after,
@@ -147,13 +168,42 @@ button:not(.specular-button)::before,
   pointer-events: none;
   opacity: 0;
   padding: 1px;
-  background: radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.82), transparent 62%);
+  background: radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.30), transparent 62%);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   transition: opacity 220ms ease;
 }
 button:not(.specular-button):hover::before { opacity: 1; }
+/* Shared Button primitive — keyboard focus ring beats inline resting shadows. */
+button.ui-btn:focus-visible {
+  border-color: var(--color-border-focus) !important;
+  box-shadow: var(--focus-ring) !important;
+}
+/* Dropdown / popover panels float above the page: same tokens as Modal. */
+.menu-panel {
+  background: var(--color-surface-overlay);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-overlay);
+}
+/* Native form controls — no primitive component exists, so the system
+   styles them directly. Dark, carved-in, neutral; never bright white. */
+select {
+  background-color: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-input);
+}
+select:focus {
+  border-color: var(--color-border-focus);
+  box-shadow: var(--shadow-input), var(--focus-ring);
+  outline: none;
+}
+option { background-color: var(--color-surface-elevated); color: var(--color-text-primary); }
+input::placeholder, textarea::placeholder { color: var(--color-text-faint); opacity: 1; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--color-accent); width: 14px; height: 14px; cursor: pointer; }
 
 .leaflet-container { font-family: var(--font-body) !important; width: 100%; height: 100%; border-radius: var(--radius-xl); background-color: var(--color-background-secondary) !important; }
 .custom-map-div-icon { background: transparent !important; border: none !important; }

@@ -17,26 +17,31 @@ const variantStyles: Record<Variant, React.CSSProperties> = {
     background: 'var(--color-accent)',
     color: 'var(--color-text-inverse)',
     border: '1px solid transparent',
+    boxShadow: 'var(--shadow-subtle)',
   },
   secondary: {
     background: 'var(--color-surface-elevated)',
     color: 'var(--color-text-primary)',
     border: '1px solid var(--color-border-strong)',
+    boxShadow: 'var(--shadow-subtle)',
   },
   ghost: {
     background: 'transparent',
     color: 'var(--color-text-secondary)',
     border: '1px solid var(--color-border)',
+    boxShadow: 'none',
   },
   danger: {
-    background: 'var(--color-accent)',
-    color: 'var(--color-text-inverse)',
+    background: 'var(--color-danger)',
+    color: '#FFFFFF',
     border: '1px solid transparent',
+    boxShadow: 'var(--shadow-subtle)',
   },
   success: {
-    background: 'var(--color-accent)',
-    color: 'var(--color-text-inverse)',
+    background: 'var(--color-success)',
+    color: '#FFFFFF',
     border: '1px solid transparent',
+    boxShadow: 'var(--shadow-subtle)',
   },
 };
 
@@ -48,16 +53,18 @@ const sizeStyles: Record<Size, React.CSSProperties> = {
 };
 
 const variantSpecular: Record<Variant, { baseColor: string; lineColor: string; textColor: string }> = {
-  primary: { baseColor: '#24344d', lineColor: '#ffffff', textColor: '#ffffff' },
-  secondary: { baseColor: '#24344d', lineColor: '#ffffff', textColor: '#ffffff' },
-  ghost: { baseColor: '#24344d', lineColor: '#ffffff', textColor: '#ffffff' },
-  danger: { baseColor: '#24344d', lineColor: '#ffffff', textColor: '#ffffff' },
-  success: { baseColor: '#24344d', lineColor: '#ffffff', textColor: '#ffffff' },
+  primary: { baseColor: '#3A3A3A', lineColor: '#ffffff', textColor: '#ffffff' },
+  secondary: { baseColor: '#3A3A3A', lineColor: '#ffffff', textColor: '#ffffff' },
+  ghost: { baseColor: '#3A3A3A', lineColor: '#ffffff', textColor: '#ffffff' },
+  danger: { baseColor: '#3A3A3A', lineColor: '#ffffff', textColor: '#ffffff' },
+  success: { baseColor: '#3A3A3A', lineColor: '#ffffff', textColor: '#ffffff' },
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'secondary', size = 'md', loading, leftIcon, rightIcon, children, disabled, type = 'button', style, className, ...props }, ref) => {
     const isDisabled = disabled || loading;
+    const [hovered, setHovered] = React.useState(false);
+    const [pressed, setPressed] = React.useState(false);
     const spec = variantSpecular[variant];
     // Use specular for all variants — adapts to existing token palette, no orange/red
     const useSpecular = !isDisabled;
@@ -95,6 +102,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isDisabled}
         aria-busy={loading || undefined}
         aria-disabled={isDisabled || undefined}
+        onMouseEnter={() => { if (!isDisabled) setHovered(true); }}
+        onMouseLeave={() => { setHovered(false); setPressed(false); }}
+        onMouseDown={() => { if (!isDisabled) setPressed(true); }}
+        onMouseUp={() => setPressed(false)}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
@@ -105,13 +116,26 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           lineHeight: 1,
           cursor: isDisabled ? 'not-allowed' : 'pointer',
           opacity: isDisabled ? Number.parseFloat('var(--opacity-disabled)') || 0.45 : 1,
-          transition: 'background var(--transition-normal), border-color var(--transition-normal), opacity var(--transition-fast), box-shadow var(--transition-normal), transform var(--transition-fast)',
+          transition: 'background var(--transition-normal), border-color var(--transition-normal), opacity var(--transition-fast), box-shadow var(--transition-normal), transform var(--transition-fast), filter var(--transition-fast)',
           whiteSpace: 'nowrap',
           ...variantStyles[variant],
           ...sizeStyles[size],
+          // Interactive depth: rest on subtle elevation, lift slightly on
+          // hover, press into an inset state when active, go flat when disabled.
+          ...(isDisabled
+            ? { boxShadow: 'none' as const }
+            : pressed
+              ? { boxShadow: 'var(--shadow-inset)', filter: 'brightness(0.94)' }
+              : hovered
+                ? {
+                    boxShadow: 'var(--shadow-standard)',
+                    filter: 'brightness(1.07)',
+                    ...(variant === 'ghost' ? { background: 'var(--color-surface-elevated)' } : {}),
+                  }
+                : {}),
           ...style,
         }}
-        className={className}
+        className={['ui-btn', className].filter(Boolean).join(' ') || undefined}
         {...props}
       >
         {loading ? (

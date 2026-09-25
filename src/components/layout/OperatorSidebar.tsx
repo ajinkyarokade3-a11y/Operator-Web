@@ -64,7 +64,7 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
       label: 'Active Tours',
       icon: Map,
       badge: activeToursCount > 0 ? `${activeToursCount}` : undefined,
-      badgeColor: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+      badgeColor: 'bg-neutral-500/20 text-neutral-300 border-neutral-500/30',
     },
     {
       id: 'itineraries' as OperatorNavTab,
@@ -113,11 +113,11 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
   const handleItemSelect = useCallback((item: any) => onSelectTab(item.id), [onSelectTab]);
 
   return (
-    <aside className="sidebar w-64 bg-slate-900 border-r border-slate-800 flex flex-col p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', height: '100%', overflow: 'hidden' }}>
+    <aside className="sidebar w-64 bg-neutral-900 border-r border-neutral-800 flex flex-col p-4" style={{ fontFamily: 'Inter, system-ui, sans-serif', height: '100%', overflow: 'hidden' }}>
       <div className="space-y-4" style={{ flexShrink: 0 }}>
         {/* Operations Hub Info Card */}
-        <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3.5">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+        <div className="bg-neutral-950/60 border border-neutral-800 rounded-xl p-3.5">
+          <div className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider mb-1">
             Active Agency
           </div>
           <div className="font-bold text-white text-sm flex items-center justify-between">
@@ -126,11 +126,11 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
               Verified
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1">
+          <p className="text-[11px] text-neutral-400 mt-1">
             Direct dispatch authority for Himachal, Ladakh & Kashmir sectors.
           </p>
         </div>
-        <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider px-3">
+        <div className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider px-3">
           Operations Menu
         </div>
       </div>
@@ -153,12 +153,12 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
                 onClick={() => onSelectTab(item.id)}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-slate-800 text-white border border-slate-700'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                    ? 'bg-neutral-800 text-white border border-neutral-700'
+                    : 'text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800/80'
                 }`}
               >
                 <div className="flex items-center space-x-3">
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-slate-400'}`} />
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-neutral-400'}`} />
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
@@ -177,18 +177,18 @@ export const OperatorSidebar: React.FC<OperatorSidebarProps> = ({
       </div>
 
       {/* Footer Support Widget */}
-      <div className="pt-4 border-t border-slate-800/80 space-y-3">
-        <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-3 text-xs text-slate-400">
-          <div className="flex items-center space-x-2 text-slate-300 font-semibold mb-1">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+      <div className="pt-4 border-t border-neutral-800/80 space-y-3">
+        <div className="bg-neutral-950/40 border border-neutral-800 rounded-xl p-3 text-xs text-neutral-400">
+          <div className="flex items-center space-x-2 text-neutral-300 font-semibold mb-1">
+            <Sparkles className="w-3.5 h-3.5 text-neutral-400" />
             <span>Gemini Ops Engine</span>
           </div>
-          <p className="text-[11px] text-slate-400">
+          <p className="text-[11px] text-neutral-400">
             Automated impact analysis & high-confidence alternative scoring active.
           </p>
         </div>
 
-        <div className="flex items-center justify-between text-[11px] text-slate-500 px-1">
+        <div className="flex items-center justify-between text-[11px] text-neutral-500 px-1">
           <span>TourFlow Core v2.4</span>
           <span className="flex items-center space-x-1 text-emerald-400">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />

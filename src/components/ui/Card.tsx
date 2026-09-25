@@ -1,6 +1,6 @@
 import React from 'react';
 
-type Variant = 'default' | 'elevated' | 'outlined' | 'interactive';
+type Variant = 'default' | 'elevated' | 'outlined' | 'interactive' | 'sunken' | 'overlay';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: Variant;
@@ -9,26 +9,42 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const variantStyles: Record<Variant, React.CSSProperties> = {
+  // Quiet base — sits close to the page, minimal lift.
   default: {
     background: 'var(--color-surface)',
-    border: '1px solid var(--color-border)',
+    border: '1px solid var(--color-border-subtle)',
     boxShadow: 'var(--shadow-subtle)',
   },
+  // Lifted panel — one rung lighter with a standard soft shadow.
   elevated: {
     background: 'var(--color-surface-elevated)',
     border: '1px solid var(--color-border)',
-    boxShadow: 'var(--shadow-elevated)',
+    boxShadow: 'var(--shadow-standard)',
   },
+  // Ghost — merges with whatever is behind it, border only.
   outlined: {
     background: 'transparent',
     border: '1px solid var(--color-border-strong)',
     boxShadow: 'none',
   },
+  // Interactive — rests at base, lifts on hover.
   interactive: {
     background: 'var(--color-surface)',
     border: '1px solid var(--color-border)',
     boxShadow: 'var(--shadow-subtle)',
     cursor: 'pointer',
+  },
+  // Carved well — darker than the page, inset rather than raised.
+  sunken: {
+    background: 'var(--color-surface-sunken)',
+    border: '1px solid var(--color-border-subtle)',
+    boxShadow: 'var(--shadow-inset)',
+  },
+  // Important floating panel — brightest rung with the deepest soft shadow.
+  overlay: {
+    background: 'var(--color-surface-overlay)',
+    border: '1px solid var(--color-border-strong)',
+    boxShadow: 'var(--shadow-overlay)',
   },
 };
 
@@ -57,7 +73,7 @@ export const Card: React.FC<CardProps> = ({ variant = 'default', padding = 'md',
     padding: paddingMap[padding],
     transition: 'background var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal)',
     ...variantStyles[interactive ? 'interactive' : variant],
-    ...(interactive && hovered ? { background: 'var(--color-surface-hover)', borderColor: 'var(--color-border-strong)', boxShadow: 'var(--shadow-elevated)' } : {}),
+    ...(interactive && hovered ? { background: 'var(--color-surface-interactive)', borderColor: 'var(--color-border-strong)', boxShadow: 'var(--shadow-standard)' } : {}),
     ...style,
   };
   const a11y = interactive ? { role: (role as any) || 'button', tabIndex: tabIndex ?? 0, onKeyDown: (e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); (e.target as HTMLElement).click(); } } } : {};
@@ -80,7 +96,7 @@ export const Card: React.FC<CardProps> = ({ variant = 'default', padding = 'md',
           pointerEvents: 'none',
           opacity: isShine ? 1 : 0,
           padding: 1,
-          background: `radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.82), rgba(255,255,255,0.38) 32%, transparent 62%)`,
+          background: `radial-gradient(220px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.28), rgba(255,255,255,0.12) 32%, transparent 62%)`,
           WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
           WebkitMaskComposite: 'xor',
           maskComposite: 'exclude',

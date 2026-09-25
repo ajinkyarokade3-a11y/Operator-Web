@@ -53,12 +53,12 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
               DYNAMIC SCHEDULES
             </span>
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-neutral-400 mt-0.5">
             Real-time day-by-day activity timelines, hotel nights, chauffeur legs, and instant AI replan triggers.
           </p>
         </div>
 
-        <div className="text-xs text-slate-400 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+        <div className="text-xs text-neutral-400 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800">
           Total Managed Itineraries: <strong className="text-white">{trips.length}</strong>
         </div>
       </div>
@@ -68,13 +68,13 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
         {/* Left Column: Itinerary Selector */}
         <div className="lg:col-span-4 space-y-3">
           <div className="relative">
-            <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+            <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter itineraries..."
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+              className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400"
             />
           </div>
 
@@ -88,18 +88,18 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
                   onClick={() => setSelectedTripId(t.id)}
                   className={`p-4 rounded-xl border cursor-pointer transition-all ${
                     isSelected
-                      ? 'bg-slate-900 border-emerald-500 shadow-md shadow-emerald-950/40'
-                      : 'bg-slate-950/60 border-slate-800 hover:border-slate-700 hover:bg-slate-900/60'
+                      ? 'bg-neutral-900 border-emerald-500 shadow-md shadow-black/40'
+                      : 'bg-neutral-950/60 border-neutral-800 hover:border-neutral-700 hover:bg-neutral-900/60'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-mono font-bold text-sky-400">#{t.id}</span>
+                    <span className="text-[11px] font-mono font-bold text-neutral-200">#{t.id}</span>
                     <span
                       className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
                         t.status === 'ongoing'
                           ? 'bg-emerald-500/20 text-emerald-300'
                           : t.status === 'confirmed'
-                          ? 'bg-sky-500/20 text-sky-300'
+                          ? 'bg-neutral-500/20 text-neutral-300'
                           : 'bg-amber-500/20 text-amber-300'
                       }`}
                     >
@@ -108,7 +108,7 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
                   </div>
 
                   <h4 className="text-sm font-bold text-white mt-1 line-clamp-1">{t.title}</h4>
-                  <div className="text-xs text-slate-400 mt-1 flex items-center justify-between">
+                  <div className="text-xs text-neutral-400 mt-1 flex items-center justify-between">
                     <span>{t.destination?.name} ({t.duration_days} Days)</span>
                     <span className="font-mono text-emerald-400 font-semibold">
                       ₹{(t.total_cost || t.total_budget || 0).toLocaleString()}
@@ -131,15 +131,15 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
         {activeTrip ? (
           <div className="lg:col-span-8 space-y-4">
             {/* Itinerary Header Card */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <div className="flex items-center space-x-2">
-                  <span className="text-xs font-mono font-bold text-sky-400">TOUR #{activeTrip.id}</span>
-                  <span className="text-xs text-slate-400">•</span>
-                  <span className="text-xs text-slate-300 font-medium">{activeTrip.origin} → {activeTrip.destination?.name}</span>
+                  <span className="text-xs font-mono font-bold text-neutral-200">TOUR #{activeTrip.id}</span>
+                  <span className="text-xs text-neutral-400">•</span>
+                  <span className="text-xs text-neutral-300 font-medium">{activeTrip.origin} → {activeTrip.destination?.name}</span>
                 </div>
                 <h2 className="text-lg font-bold text-white mt-1">{activeTrip.title}</h2>
-                <div className="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-3">
+                <div className="text-xs text-neutral-400 mt-1 flex flex-wrap items-center gap-3">
                   <span>Dates: <strong className="text-white">{activeTrip.formatted_dates}</strong></span>
                   <span>•</span>
                   <span>Travelers: <strong className="text-white">{activeTrip.traveler_count} ({activeTrip.travel_type})</strong></span>
@@ -162,9 +162,9 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
             </div>
 
             {/* Daily Timeline Manifest */}
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
               <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
-                <CalendarRange className="w-4 h-4 text-sky-400" />
+                <CalendarRange className="w-4 h-4 text-neutral-200" />
                 <span>Day-by-Day Operations Manifest</span>
               </h3>
 
@@ -173,20 +173,20 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
                   activeTrip.itinerary.map((item, idx) => (
                     <div
                       key={item.id || idx}
-                      className={`bg-slate-950 border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
+                      className={`bg-neutral-950 border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors ${
                         item.status === 'skipped'
                           ? 'border-rose-900/50 bg-rose-950/10 opacity-70'
-                          : 'border-slate-800 hover:border-slate-700'
+                          : 'border-neutral-800 hover:border-neutral-700'
                       }`}
                     >
                       <div className="flex items-start space-x-3.5">
-                        <div className="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs font-mono font-bold text-emerald-400 flex-shrink-0">
+                        <div className="px-2.5 py-1 rounded-lg bg-neutral-900 border border-neutral-800 text-xs font-mono font-bold text-emerald-400 flex-shrink-0">
                           Day {item.day_number}
                         </div>
 
                         <div className="space-y-1">
                           <div className="flex items-center space-x-2">
-                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                            <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">
                               {item.item_type}
                             </span>
                             {item.status && (
@@ -203,11 +203,11 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
                           </div>
                           <div className="text-sm font-bold text-white">{item.title}</div>
                           {item.description && (
-                            <p className="text-xs text-slate-400 max-w-xl leading-relaxed">{item.description}</p>
+                            <p className="text-xs text-neutral-400 max-w-xl leading-relaxed">{item.description}</p>
                           )}
                           {item.location && (
-                            <div className="text-[11px] text-slate-500 flex items-center space-x-1">
-                              <MapPin className="w-3 h-3 text-slate-600" />
+                            <div className="text-[11px] text-neutral-500 flex items-center space-x-1">
+                              <MapPin className="w-3 h-3 text-neutral-600" />
                               <span>{item.location}</span>
                             </div>
                           )}
@@ -218,12 +218,12 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
                         <div className="font-mono text-sm font-bold text-emerald-400">
                           ₹{(item.cost || 0).toLocaleString()}
                         </div>
-                        <div className="text-[10px] text-slate-500">Allotment confirmed</div>
+                        <div className="text-[10px] text-neutral-500">Allotment confirmed</div>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <div className="p-8 text-center text-slate-500 text-xs">
+                  <div className="p-8 text-center text-neutral-500 text-xs">
                     No itinerary items generated yet.
                   </div>
                 )}
@@ -231,7 +231,7 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
             </div>
           </div>
         ) : (
-          <div className="lg:col-span-8 bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400">
+          <div className="lg:col-span-8 bg-neutral-900 border border-neutral-800 rounded-2xl p-12 text-center text-neutral-400">
             Select an itinerary on the left to view daily operations schedule.
           </div>
         )}

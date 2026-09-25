@@ -10,7 +10,9 @@ export const THEME = {
     backgroundSecondary: 'var(--color-background-secondary)',
     backgroundTertiary: 'var(--color-background-tertiary)',
     surface: 'var(--color-surface)',
+    surfaceSunken: 'var(--color-surface-sunken)',
     surfaceElevated: 'var(--color-surface-elevated)',
+    surfaceInteractive: 'var(--color-surface-interactive)',
     surfaceHover: 'var(--color-surface-hover)',
     surfaceOverlay: 'var(--color-surface-overlay)',
 
@@ -76,9 +78,18 @@ export const THEME = {
 
   shadows: {
     subtle: 'var(--shadow-subtle)',
+    standard: 'var(--shadow-standard)',
     elevated: 'var(--shadow-elevated)',
+    overlay: 'var(--shadow-overlay)',
     modal: 'var(--shadow-modal)',
+    inset: 'var(--shadow-inset)',
+    input: 'var(--shadow-input)',
     glow: 'var(--shadow-glow-accent)',
+  },
+
+  highlights: {
+    top: 'var(--highlight-top)',
+    topSubtle: 'var(--highlight-top-subtle)',
   },
 
   transitions: {

@@ -10,7 +10,7 @@ interface FieldProps {
 const baseInput: React.CSSProperties = {
   width: '100%',
   height: 'var(--input-height)',
-  background: 'var(--color-background-secondary)',
+  background: 'var(--color-surface-sunken)',
   border: '1px solid var(--color-border)',
   borderRadius: 'var(--radius-md)',
   color: 'var(--color-text-primary)',
@@ -18,6 +18,7 @@ const baseInput: React.CSSProperties = {
   fontSize: 'var(--text-sm)',
   padding: '0 12px',
   outline: 'none',
+  boxShadow: 'var(--shadow-input)',
   transition: 'border-color var(--transition-fast), box-shadow var(--transition-fast)',
 };
 
@@ -49,7 +50,11 @@ export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttribute
           style={{
             ...baseInput,
             borderColor: error ? 'var(--color-danger-border)' : focused ? 'var(--color-border-focus)' : 'var(--color-border)',
-            boxShadow: focused ? 'var(--focus-ring)' : 'none',
+            boxShadow: error
+              ? 'var(--shadow-input)'
+              : focused
+                ? 'var(--shadow-input), var(--focus-ring)'
+                : 'var(--shadow-input)',
             ...style,
           }}
           onFocus={(e) => { setFocused(true); onFocus?.(e); }}
@@ -77,7 +82,7 @@ export const Textarea = React.forwardRef<HTMLTextAreaElement, React.TextareaHTML
             padding: '10px 12px',
             resize: 'vertical' as const,
             borderColor: error ? 'var(--color-danger-border)' : focused ? 'var(--color-border-focus)' : 'var(--color-border)',
-            boxShadow: focused ? 'var(--focus-ring)' : 'none',
+            boxShadow: focused ? 'var(--shadow-input), var(--focus-ring)' : 'var(--shadow-input)',
             ...style,
           }}
           onFocus={(e) => { setFocused(true); onFocus?.(e); }}
@@ -100,7 +105,7 @@ export const Select = React.forwardRef<HTMLSelectElement, React.SelectHTMLAttrib
           style={{
             ...baseInput,
             borderColor: error ? 'var(--color-danger-border)' : focused ? 'var(--color-border-focus)' : 'var(--color-border)',
-            boxShadow: focused ? 'var(--focus-ring)' : 'none',
+            boxShadow: focused ? 'var(--shadow-input), var(--focus-ring)' : 'var(--shadow-input)',
             ...style,
           }}
           onFocus={(e) => { setFocused(true); onFocus?.(e as any); }}
@@ -127,7 +132,7 @@ export const SearchInput: React.FC<React.InputHTMLAttributes<HTMLInputElement> &
           ...baseInput,
           paddingLeft: 36,
           borderColor: focused ? 'var(--color-border-focus)' : 'var(--color-border)',
-          boxShadow: focused ? 'var(--focus-ring)' : 'none',
+          boxShadow: focused ? 'var(--shadow-input), var(--focus-ring)' : 'var(--shadow-input)',
           ...style,
         }}
         onFocus={() => setFocused(true)}

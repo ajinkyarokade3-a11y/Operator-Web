@@ -1,12 +1,12 @@
 import React from 'react';
 
 export const Table: React.FC<React.HTMLAttributes<HTMLDivElement> & { bleed?: boolean }> = ({ children, style, bleed, ...p }) => (
-  <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border)', background: 'var(--color-surface)', ...style }} {...p}>
+  <div style={{ overflowX: 'auto', borderRadius: 'var(--radius-lg)', border: '1px solid var(--color-border-subtle)', background: 'var(--color-surface)', boxShadow: 'var(--shadow-subtle)', ...style }} {...p}>
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-sm)' }}>{children}</table>
   </div>
 );
 export const TableHeader: React.FC<React.HTMLAttributes<HTMLTableSectionElement>> = (p) => (
-  <thead style={{ background: 'var(--color-background-secondary)', borderBottom: '1px solid var(--color-border)' } as any} {...p} />
+  <thead style={{ background: 'var(--color-background-secondary)', borderBottom: '1px solid var(--color-border)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)' } as any} {...p} />
 );
 export const TableBody: React.FC<React.HTMLAttributes<HTMLTableSectionElement>> = (p) => <tbody {...p} />;
 export const TableRow: React.FC<React.HTMLAttributes<HTMLTableRowElement> & { hover?: boolean }> = ({ hover = true, style, ...p }) => (

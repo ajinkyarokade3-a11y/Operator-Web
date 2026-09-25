@@ -60,12 +60,12 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
               </span>
             )}
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-neutral-400 mt-0.5">
             Incoming booking inquiries directly from travelers requiring partner assignment, hotel lock-in, and confirmation.
           </p>
         </div>
 
-        <div className="text-xs text-slate-400 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800">
+        <div className="text-xs text-neutral-400 px-3 py-1.5 rounded-lg bg-neutral-900 border border-neutral-800">
           Total Requests: <strong className="text-white">{trips.length}</strong>
         </div>
       </div>
@@ -73,13 +73,13 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
       {/* Search & Filter Controls */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by trip name, destination, route, or #ID..."
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400"
           />
         </div>
 
@@ -95,8 +95,8 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
               onClick={() => setStatusFilter(tab.id as any)}
               className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize whitespace-nowrap transition-colors ${
                 statusFilter === tab.id
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-white text-black'
+                  : 'bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-neutral-200'
               }`}
             >
               {tab.label}
@@ -108,8 +108,8 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
       {/* Requests List */}
       <div className="space-y-4">
         {filtered.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center text-slate-400">
-            <Inbox className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-12 text-center text-neutral-400">
+            <Inbox className="w-8 h-8 text-neutral-600 mx-auto mb-2" />
             <div className="text-white font-bold text-sm">No trip requests matching criteria</div>
             <p className="text-xs mt-1">Try clearing your search query or status filter.</p>
           </div>
@@ -119,11 +119,11 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
             return (
               <div
                 key={req.id}
-                className={`bg-slate-900 border rounded-2xl p-5 shadow-sm transition-all ${
+                className={`bg-neutral-900 border rounded-2xl p-5 shadow-sm transition-all ${
                   isPending
-                    ? 'border-amber-500/40 bg-gradient-to-r from-amber-950/10 via-slate-900 to-slate-900 hover:border-amber-500/60'
+                    ? 'border-amber-500/40 bg-gradient-to-r from-amber-950/10 via-neutral-900 to-neutral-900 hover:border-amber-500/60'
                     : req.status === 'confirmed'
-                    ? 'border-slate-800 hover:border-slate-700'
+                    ? 'border-neutral-800 hover:border-neutral-700'
                     : 'border-rose-900/40 opacity-70'
                 }`}
               >
@@ -131,7 +131,7 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                   {/* Left Main Info */}
                   <div className="space-y-2 max-w-2xl">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-mono font-bold text-sky-400">#{req.id}</span>
+                      <span className="text-xs font-mono font-bold text-neutral-200">#{req.id}</span>
                       <span
                         className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
                           isPending
@@ -143,32 +143,32 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                       >
                         {isPending ? 'Pending Operator Review' : req.status}
                       </span>
-                      <span className="text-xs text-slate-400 font-medium">
+                      <span className="text-xs text-neutral-400 font-medium">
                         Submitted: {new Date(req.created_at || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     </div>
 
                     <h3 className="text-base font-bold text-white">{req.title}</h3>
 
-                    <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
+                    <div className="flex flex-wrap items-center gap-4 text-xs text-neutral-400">
                       <span className="flex items-center space-x-1">
-                        <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Route: <strong className="text-slate-200">{req.origin || 'Mumbai'} → {req.destination?.name}</strong></span>
+                        <MapPin className="w-3.5 h-3.5 text-neutral-500" />
+                        <span>Route: <strong className="text-neutral-200">{req.origin || 'Mumbai'} → {req.destination?.name}</strong></span>
                       </span>
                       <span>•</span>
                       <span className="flex items-center space-x-1">
-                        <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Dates: <strong className="text-slate-200">{req.formatted_dates}</strong> ({req.duration_days} Days)</span>
+                        <Calendar className="w-3.5 h-3.5 text-neutral-500" />
+                        <span>Dates: <strong className="text-neutral-200">{req.formatted_dates}</strong> ({req.duration_days} Days)</span>
                       </span>
                       <span>•</span>
                       <span className="flex items-center space-x-1">
-                        <Users className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Group: <strong className="text-slate-200">{req.traveler_count} Pax ({req.travel_type})</strong></span>
+                        <Users className="w-3.5 h-3.5 text-neutral-500" />
+                        <span>Group: <strong className="text-neutral-200">{req.traveler_count} Pax ({req.travel_type})</strong></span>
                       </span>
                     </div>
 
                     {req.preferences?.special_requests && (
-                      <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-2.5 text-xs text-amber-300/90 flex items-start space-x-2">
+                      <div className="bg-neutral-950/60 border border-neutral-800 rounded-xl p-2.5 text-xs text-amber-300/90 flex items-start space-x-2">
                         <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-400" />
                         <span><strong>Traveler Note:</strong> "{req.preferences.special_requests}"</span>
                       </div>
@@ -176,9 +176,9 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                   </div>
 
                   {/* Right Actions & Budget */}
-                  <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-3 border-t lg:border-t-0 pt-3 lg:pt-0 border-slate-800">
+                  <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-3 border-t lg:border-t-0 pt-3 lg:pt-0 border-neutral-800">
                     <div className="text-left lg:text-right">
-                      <div className="text-[10px] uppercase font-semibold text-slate-500">Requested Package Budget</div>
+                      <div className="text-[10px] uppercase font-semibold text-neutral-500">Requested Package Budget</div>
                       <div className="text-base font-bold text-emerald-400 font-mono">
                         ₹{(req.total_budget || req.total_cost || 0).toLocaleString()}
                       </div>
@@ -190,7 +190,7 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                           <button
                             id={`btn-accept-request-${req.id}`}
                             onClick={() => onAcceptTripRequest(req.id)}
-                            className="flex-1 sm:flex-none px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow flex items-center justify-center space-x-1.5 transition-colors"
+                            className="flex-1 sm:flex-none px-3.5 py-2 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-xl shadow flex items-center justify-center space-x-1.5 transition-colors"
                           >
                             <UserCheck className="w-3.5 h-3.5" />
                             <span>Accept & Assign</span>
@@ -198,14 +198,14 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                           <button
                             id={`btn-review-request-${req.id}`}
                             onClick={() => onSelectTrip(req.id)}
-                            className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-xl border border-slate-700 transition-colors"
+                            className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-medium rounded-xl border border-neutral-700 transition-colors"
                           >
                             Review
                           </button>
                           <button
                             id={`btn-decline-request-${req.id}`}
                             onClick={() => onDeclineTripRequest(req.id)}
-                            className="p-2 text-slate-500 hover:text-rose-400 hover:bg-slate-800 rounded-xl transition-colors"
+                            className="p-2 text-neutral-500 hover:text-rose-400 hover:bg-neutral-800 rounded-xl transition-colors"
                             title="Decline request"
                           >
                             <XCircle className="w-4 h-4" />
@@ -214,7 +214,7 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                       ) : (
                         <button
                           onClick={() => onSelectTrip(req.id)}
-                          className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-xs font-semibold rounded-xl border border-slate-700 transition-colors flex items-center space-x-1.5"
+                          className="px-3.5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white text-xs font-semibold rounded-xl border border-neutral-700 transition-colors flex items-center space-x-1.5"
                         >
                           <span>Open Itinerary Workspace</span>
                           <ArrowRight className="w-3.5 h-3.5" />

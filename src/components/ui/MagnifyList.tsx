@@ -57,7 +57,7 @@ const MagnifyItem = ({ children, containerRef, cursorY, isHovering }: any) => {
       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
       style={{ transformOrigin: 'center center', willChange: 'transform, opacity' }}
     >
-      <div style={{ borderRadius: 12, boxShadow: scale > 1.12 ? '0 0 0 1px rgba(255,255,255,0.07), 0 6px 20px rgba(0,0,0,0.30)' : 'none' }}>
+      <div style={{ borderRadius: 12, boxShadow: scale > 1.12 ? '0 0 0 1px var(--color-border), var(--shadow-subtle)' : 'none' }}>
         {children}
       </div>
     </motion.div>

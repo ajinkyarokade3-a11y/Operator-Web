@@ -31,7 +31,7 @@ export const OperatorDashboard: React.FC<Props> = ({ kpis, priorityAlerts, activ
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 800, color: 'var(--color-text-primary)' }}>Operations Command</h1>
+            <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>Operations Command</h1>
             <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 'var(--tracking-wider)', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, background: 'var(--color-accent-soft)', color: 'var(--color-accent)', border: '1px solid var(--color-accent-border)' }}>Live Dispatch</span>
           </div>
           <p style={{ fontSize: 13, color: 'var(--color-text-muted)', marginTop: 4 }}>Real-time tours, vendor allotments & traveler safety.</p>

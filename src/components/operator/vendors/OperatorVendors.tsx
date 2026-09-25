@@ -401,62 +401,62 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
   const renderRow = (a: ActivityAssignment) => {
     const trip = tripById.get(a.trip_id);
     return (
-      <div key={a.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+      <div key={a.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="font-mono text-xs font-bold text-sky-400 truncate">{a.trip_id}</span>
-            {trip && <span className="text-xs text-slate-400 truncate hidden sm:inline">{trip.title}</span>}
+            <span className="font-mono text-xs font-bold text-neutral-200 truncate">{a.trip_id}</span>
+            {trip && <span className="text-xs text-neutral-400 truncate hidden sm:inline">{trip.title}</span>}
             <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLES[a.status]}`}>
               {a.status}
             </span>
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
-            <button onClick={() => setDetailId(a.id)} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1">
+            <button onClick={() => setDetailId(a.id)} className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700 flex items-center gap-1">
               <Eye className="w-3 h-3" /> Details
             </button>
-            <button onClick={() => openEdit(a)} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1">
+            <button onClick={() => openEdit(a)} className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700 flex items-center gap-1">
               <Pencil className="w-3 h-3" /> Edit
             </button>
             {a.status === 'pending' && (
-              <button onClick={() => handleConfirm(a.id)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1">
+              <button onClick={() => handleConfirm(a.id)} className="px-3 py-1.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" /> Confirm
               </button>
             )}
             {a.status === 'issue' ? (
-              <button onClick={() => handleResolve(a.id)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg">
+              <button onClick={() => handleResolve(a.id)} className="px-3 py-1.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg">
                 Resolve
               </button>
             ) : (
-              <button onClick={() => { setConfirmTarget(a.id); setFormReason(''); }} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1">
+              <button onClick={() => { setConfirmTarget(a.id); setFormReason(''); }} className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-amber-300 text-xs font-semibold rounded-lg border border-neutral-700 flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" /> Flag
               </button>
             )}
-            <button onClick={() => onSelectTrip(a.trip_id)} className="px-3 py-1.5 text-slate-400 hover:text-white text-xs font-semibold">Open →</button>
+            <button onClick={() => onSelectTrip(a.trip_id)} className="px-3 py-1.5 text-neutral-400 hover:text-white text-xs font-semibold">Open →</button>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-            <div className="text-[10px] uppercase text-slate-500 font-bold">Activity</div>
-            <div className="text-slate-200 font-semibold truncate">{a.activity?.title || a.activity_id}</div>
-            <div className="text-slate-500 text-[11px]">{a.activity?.category || ''}{a.activity?.duration_hours ? ` · ${a.activity.duration_hours}h` : ''}</div>
+          <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+            <div className="text-[10px] uppercase text-neutral-500 font-bold">Activity</div>
+            <div className="text-neutral-200 font-semibold truncate">{a.activity?.title || a.activity_id}</div>
+            <div className="text-neutral-500 text-[11px]">{a.activity?.category || ''}{a.activity?.duration_hours ? ` · ${a.activity.duration_hours}h` : ''}</div>
           </div>
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-            <div className="text-[10px] uppercase text-slate-500 font-bold">Vendor</div>
-            <div className="text-slate-200 font-semibold truncate">{a.vendor?.name || 'Unassigned'}</div>
-            <div className="text-slate-500 text-[11px]">{a.vendor?.phone || 'no vendor yet'}</div>
+          <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+            <div className="text-[10px] uppercase text-neutral-500 font-bold">Vendor</div>
+            <div className="text-neutral-200 font-semibold truncate">{a.vendor?.name || 'Unassigned'}</div>
+            <div className="text-neutral-500 text-[11px]">{a.vendor?.phone || 'no vendor yet'}</div>
           </div>
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-            <div className="text-[10px] uppercase text-slate-500 font-bold">Schedule</div>
-            <div className="text-slate-200 font-semibold">{a.scheduled_date || 'Unscheduled'}</div>
-            <div className="text-slate-500 text-[11px]">{a.start_time || '?'} → {a.end_time || '?'}</div>
+          <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+            <div className="text-[10px] uppercase text-neutral-500 font-bold">Schedule</div>
+            <div className="text-neutral-200 font-semibold">{a.scheduled_date || 'Unscheduled'}</div>
+            <div className="text-neutral-500 text-[11px]">{a.start_time || '?'} → {a.end_time || '?'}</div>
           </div>
-          <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-            <div className="text-[10px] uppercase text-slate-500 font-bold">Allocation / Price</div>
-            <div className="text-slate-200 font-semibold">
+          <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+            <div className="text-[10px] uppercase text-neutral-500 font-bold">Allocation / Price</div>
+            <div className="text-neutral-200 font-semibold">
               {a.participants != null ? `${a.participants} pax` : '—'}
               {a.activity?.capacity != null && (
-                <span className={a.remaining_capacity != null && a.remaining_capacity < 0 ? 'text-rose-400' : 'text-slate-500'}>
+                <span className={a.remaining_capacity != null && a.remaining_capacity < 0 ? 'text-rose-400' : 'text-neutral-500'}>
                   {' '} / cap {a.activity.capacity}
                 </span>
               )}
@@ -480,11 +480,11 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
               value={formReason}
               onChange={(e) => setFormReason(e.target.value)}
               placeholder="Issue reason (required)"
-              className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white"
+              className="flex-1 bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white"
             />
             <div className="flex gap-2">
               <button onClick={() => handleFlag(a.id)} className="px-3 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl">Confirm Flag</button>
-              <button onClick={() => { setConfirmTarget(null); setFormReason(''); }} className="px-3 py-2 bg-slate-800 text-slate-300 text-xs font-bold rounded-xl">Cancel</button>
+              <button onClick={() => { setConfirmTarget(null); setFormReason(''); }} className="px-3 py-2 bg-neutral-800 text-neutral-300 text-xs font-bold rounded-xl">Cancel</button>
             </div>
           </div>
         )}
@@ -502,15 +502,15 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
               TRIP → ACTIVITY → VENDOR → STATUS
             </span>
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-neutral-400 mt-0.5">
             Dispatch board persisted in the operations database. Auto-refreshes every 30s.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={openAssign} className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1">
+          <button onClick={openAssign} className="px-3 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold flex items-center gap-1">
             <Plus className="w-3.5 h-3.5" /> Assign Activity
           </button>
-          <button onClick={() => refresh()} className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 hover:text-white">
+          <button onClick={() => refresh()} className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-bold flex items-center gap-1.5 hover:text-white">
             <RefreshCw className="w-3.5 h-3.5" /> Refresh
           </button>
         </div>
@@ -522,10 +522,10 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
         </div>
       )}
       {focusTripId && (
-        <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-bold flex items-center justify-between gap-2">
+        <div className="p-3 rounded-xl bg-neutral-500/10 border border-neutral-500/30 text-neutral-300 text-xs font-bold flex items-center justify-between gap-2">
           <span>Assigning services for trip <span className="font-mono">{focusTripId}</span> — dispatch filtered to this trip.</span>
           {onClearFocus && (
-            <button onClick={onClearFocus} className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px]">Show all</button>
+            <button onClick={onClearFocus} className="px-2 py-0.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-[11px]">Show all</button>
           )}
         </div>
       )}
@@ -549,7 +549,7 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
           <button
             key={v}
             onClick={() => setView(v)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold capitalize ${view === v ? 'bg-emerald-600 text-white' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'}`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold capitalize ${view === v ? 'bg-white text-black' : 'bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-neutral-200'}`}
           >
             {v === 'dispatch' ? `Dispatch Board (${assignments.length})` : `Vendors (${vendors.length})`}
           </button>
@@ -558,18 +558,18 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={view === 'dispatch' ? 'Search trip ID, activity, or vendor...' : 'Search vendor, phone, email, type...'}
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400"
           />
         </div>
         {view === 'dispatch' && (
           <>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | ActivityAssignmentStatus)} className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as 'all' | ActivityAssignmentStatus)} className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-200">
               <option value="all">All statuses</option>
               <option value="pending">Pending only</option>
               <option value="confirmed">Confirmed only</option>
@@ -579,9 +579,9 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
               type="date"
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200"
+              className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-200"
             />
-            <select value={sortKey} onChange={(e) => setSortKey(e.target.value as 'schedule' | 'trip' | 'updated')} className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200">
+            <select value={sortKey} onChange={(e) => setSortKey(e.target.value as 'schedule' | 'trip' | 'updated')} className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-200">
               <option value="schedule">Sort: schedule</option>
               <option value="trip">Sort: trip ID</option>
               <option value="updated">Sort: recently updated</option>
@@ -591,26 +591,26 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-slate-500 text-sm">Loading activity operations...</div>
+        <div className="text-center py-12 text-neutral-500 text-sm">Loading activity operations...</div>
       ) : view === 'dispatch' ? (
         <>
           {travelerSelections.length > 0 && (
             <div className="space-y-2">
-              <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
+              <h3 className="text-xs font-black uppercase tracking-wider text-neutral-400">
                 Traveler selections awaiting assignment ({travelerSelections.length})
               </h3>
               <div className="space-y-2">
                 {travelerSelections.map((r) => (
-                  <div key={r.key} className="bg-slate-900 border border-dashed border-sky-500/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div key={r.key} className="bg-neutral-900 border border-dashed border-neutral-500/40 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono text-xs font-bold text-sky-400 truncate">{r.tripId}</span>
+                        <span className="font-mono text-xs font-bold text-neutral-200 truncate">{r.tripId}</span>
                         <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border bg-amber-500/15 text-amber-300 border-amber-500/30">
                           Pending
                         </span>
                       </div>
                       <div className="text-sm font-bold text-white truncate mt-1">{r.title}</div>
-                      <div className="text-[11px] text-slate-400 mt-0.5">
+                      <div className="text-[11px] text-neutral-400 mt-0.5">
                         Traveler selection: ✓ {r.tripTitle} · Day {r.dayNumber}
                         {r.startTime ? ` · ${r.startTime}${r.endTime ? ` → ${r.endTime}` : ''}` : ''}
                         {' '}· {r.participants} pax · ₹{r.cost.toLocaleString()}
@@ -622,11 +622,11 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
                     <div className="flex items-center gap-1.5 shrink-0">
                       <button
                         onClick={() => startCreateFromTravelerRow(r)}
-                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg"
+                        className="px-3 py-1.5 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-lg"
                       >
                         Create assignment
                       </button>
-                      <button onClick={() => onSelectTrip(r.tripId)} className="px-3 py-1.5 text-slate-400 hover:text-white text-xs font-semibold">
+                      <button onClick={() => onSelectTrip(r.tripId)} className="px-3 py-1.5 text-neutral-400 hover:text-white text-xs font-semibold">
                         Open →
                       </button>
                     </div>
@@ -636,39 +636,39 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
             </div>
           )}
           {filtered.length === 0 && travelerSelections.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-              <Calendar className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center text-neutral-400">
+              <Calendar className="w-8 h-8 text-neutral-500 mx-auto mb-2" />
               <div className="font-bold text-white text-sm">No Activity Assignments</div>
               <p className="text-xs mt-1">No assignments match the current filters. Assign an activity to get started.</p>
-              <button onClick={openAssign} className="mt-3 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Assign Activity</button>
+              <button onClick={openAssign} className="mt-3 px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold">Assign Activity</button>
             </div>
           ) : (
             <div className="space-y-3">{filtered.map(renderRow)}</div>
           )}
         </>
       ) : filteredVendors.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-          <Building2 className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center text-neutral-400">
+          <Building2 className="w-8 h-8 text-neutral-500 mx-auto mb-2" />
           <div className="font-bold text-white text-sm">No Vendors Found</div>
           <p className="text-xs mt-1">No vendors match the current search.</p>
         </div>
       ) : (
         <div className="space-y-3">
           <div className="flex justify-end">
-            <button onClick={() => { setOnboardOpen(true); setFormName(''); setFormEmail(''); setFormPhone(''); setFormType('activity'); }} className="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl flex items-center gap-1">
+            <button onClick={() => { setOnboardOpen(true); setFormName(''); setFormEmail(''); setFormPhone(''); setFormType('activity'); }} className="px-3 py-2 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-xl flex items-center gap-1">
               <Plus className="w-3.5 h-3.5" /> Onboard Vendor
             </button>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             {filteredVendors.map((v) => (
-              <div key={v.id} className={`bg-slate-900 border rounded-2xl p-5 space-y-3 ${v.is_verified ? 'border-slate-800' : 'border-rose-900/50 opacity-80'}`}>
+              <div key={v.id} className={`bg-neutral-900 border rounded-2xl p-5 space-y-3 ${v.is_verified ? 'border-neutral-800' : 'border-rose-900/50 opacity-80'}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700">{v.vendor_type}</span>
+                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-neutral-800 text-neutral-400 border border-neutral-700">{v.vendor_type}</span>
                     <h3 className="text-base font-bold text-white mt-1.5">{v.name}</h3>
-                    <div className="text-xs text-slate-400 space-y-0.5 mt-1">
-                      {v.phone && <div className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-slate-500" />{v.phone}</div>}
-                      {v.contact_email && <div className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-slate-500" />{v.contact_email}</div>}
+                    <div className="text-xs text-neutral-400 space-y-0.5 mt-1">
+                      {v.phone && <div className="flex items-center gap-1.5"><Phone className="w-3 h-3 text-neutral-500" />{v.phone}</div>}
+                      {v.contact_email && <div className="flex items-center gap-1.5"><Mail className="w-3 h-3 text-neutral-500" />{v.contact_email}</div>}
                     </div>
                   </div>
                   <button
@@ -680,25 +680,25 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
                   </button>
                 </div>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-400 flex items-center gap-1"><Star className="w-3 h-3 text-amber-400 fill-current" />{v.rating}</span>
-                  <span className="text-slate-400">Trips served: <strong className="text-white font-mono">{v.assigned_trip_count}</strong></span>
+                  <span className="text-neutral-400 flex items-center gap-1"><Star className="w-3 h-3 text-amber-400 fill-current" />{v.rating}</span>
+                  <span className="text-neutral-400">Trips served: <strong className="text-white font-mono">{v.assigned_trip_count}</strong></span>
                 </div>
                 <button
                   onClick={() => toggleVendorAssignments(v.id)}
-                  className="w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700"
+                  className="w-full px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700"
                 >
                   {expandedVendor === v.id ? 'Hide assignments' : `View assignments (${v.assigned_trip_count} trips)`}
                 </button>
                 {expandedVendor === v.id && (
                   <div className="space-y-1.5">
                     {(vendorAssignments[v.id] || []).length === 0 ? (
-                      <div className="text-xs text-slate-500">No activities currently assigned to this vendor.</div>
+                      <div className="text-xs text-neutral-500">No activities currently assigned to this vendor.</div>
                     ) : (
                       (vendorAssignments[v.id] || []).map((a) => (
-                        <div key={a.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
+                        <div key={a.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-neutral-950 border border-neutral-800 text-xs">
                           <div className="min-w-0">
-                            <div className="font-mono text-sky-400 truncate">{a.trip_id}</div>
-                            <div className="text-slate-400 truncate">{a.activity?.title} · {a.scheduled_date || 'unscheduled'} {a.start_time || ''}</div>
+                            <div className="font-mono text-neutral-200 truncate">{a.trip_id}</div>
+                            <div className="text-neutral-400 truncate">{a.activity?.title} · {a.scheduled_date || 'unscheduled'} {a.start_time || ''}</div>
                           </div>
                           <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase shrink-0 ${STATUS_STYLES[a.status]}`}>{a.status}</span>
                         </div>
@@ -714,15 +714,15 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
 
       {assignOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-lg w-full space-y-4 max-h-[85vh] overflow-y-auto">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 max-w-lg w-full space-y-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white">{editingId ? 'Edit Activity Assignment' : 'Assign Activity to Trip'}</h3>
-              <button onClick={() => setAssignOpen(false)} className="p-1 text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setAssignOpen(false)} className="p-1 text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             {!editingId && (
               <>
-                <label className="block text-xs text-slate-400 font-bold uppercase">Trip (live trip list)</label>
-                <select value={formTripId} onChange={(e) => handleTripSelect(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+                <label className="block text-xs text-neutral-400 font-bold uppercase">Trip (live trip list)</label>
+                <select value={formTripId} onChange={(e) => handleTripSelect(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white">
                   <option value="">— Select trip —</option>
                   {trips.map((t) => (
                     <option key={t.id} value={t.id}>{t.id} — {t.title} ({t.traveler_count} pax)</option>
@@ -730,15 +730,15 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
                 </select>
               </>
             )}
-            <label className="block text-xs text-slate-400 font-bold uppercase">Activity (live inventory)</label>
-            <select value={formActivityId} onChange={(e) => setFormActivityId(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+            <label className="block text-xs text-neutral-400 font-bold uppercase">Activity (live inventory)</label>
+            <select value={formActivityId} onChange={(e) => setFormActivityId(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white">
               <option value="">— Select activity —</option>
               {inventory.map((a) => (
                 <option key={a.id} value={a.id}>{a.title} — {a.destination_name || ''} (₹{a.price_per_person.toLocaleString()}/person{a.capacity != null ? `, cap ${a.capacity}` : ''})</option>
               ))}
             </select>
-            <label className="block text-xs text-slate-400 font-bold uppercase">Vendor (eligible only)</label>
-            <select value={formVendorId} onChange={(e) => setFormVendorId(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+            <label className="block text-xs text-neutral-400 font-bold uppercase">Vendor (eligible only)</label>
+            <select value={formVendorId} onChange={(e) => setFormVendorId(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white">
               <option value="">— No vendor (pending) —</option>
               {eligibleVendors.map((v) => (
                 <option key={v.id} value={v.id}>{v.name} ({v.vendor_type}, ★{v.rating})</option>
@@ -746,24 +746,24 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
             </select>
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs text-slate-400 font-bold uppercase mb-1">Date</label>
-                <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">Date</label>
+                <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
               </div>
               <div>
-                <label className="block text-xs text-slate-400 font-bold uppercase mb-1">Start</label>
-                <input type="time" value={formStart} onChange={(e) => setFormStart(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">Start</label>
+                <input type="time" value={formStart} onChange={(e) => setFormStart(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
               </div>
               <div>
-                <label className="block text-xs text-slate-400 font-bold uppercase mb-1">End</label>
-                <input type="time" value={formEnd} onChange={(e) => setFormEnd(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">End</label>
+                <input type="time" value={formEnd} onChange={(e) => setFormEnd(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
               </div>
             </div>
             <div>
-              <label className="block text-xs text-slate-400 font-bold uppercase mb-1">Participants</label>
-              <input type="number" min={0} value={formParticipants} onChange={(e) => setFormParticipants(e.target.value)} placeholder="e.g. 4" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+              <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">Participants</label>
+              <input type="number" min={0} value={formParticipants} onChange={(e) => setFormParticipants(e.target.value)} placeholder="e.g. 4" className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
             </div>
             {formTripId && !scheduleHint && (
-              <p className="text-[11px] text-sky-300/90 bg-sky-500/10 border border-sky-500/20 rounded-xl px-3 py-2">
+              <p className="text-[11px] text-neutral-300/90 bg-neutral-500/10 border border-neutral-500/20 rounded-xl px-3 py-2">
                 Date defaults to the traveler's trip start ({trips.find((t) => t.id === formTripId)?.start_date?.slice(0, 10) || '—'}); times are operator-set.
               </p>
             )}
@@ -773,8 +773,8 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
               </p>
             )}
             <div className="flex justify-end gap-2">
-              <button onClick={() => setAssignOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancel</button>
-              <button onClick={submitAssign} disabled={submitting} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
+              <button onClick={() => setAssignOpen(false)} className="px-4 py-2 rounded-xl bg-neutral-800 text-neutral-300 text-xs font-bold">Cancel</button>
+              <button onClick={submitAssign} disabled={submitting} className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold disabled:opacity-50">
                 {submitting ? 'Saving...' : editingId ? 'Save Changes' : 'Assign Activity'}
               </button>
             </div>
@@ -784,26 +784,26 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
 
       {onboardOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full space-y-4">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 max-w-md w-full space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white">Onboard Vendor</h3>
-              <button onClick={() => setOnboardOpen(false)} className="p-1 text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setOnboardOpen(false)} className="p-1 text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
-            <label className="block text-xs text-slate-400 font-bold uppercase">Name</label>
-            <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-            <label className="block text-xs text-slate-400 font-bold uppercase">Type</label>
-            <select value={formType} onChange={(e) => setFormType(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+            <label className="block text-xs text-neutral-400 font-bold uppercase">Name</label>
+            <input type="text" value={formName} onChange={(e) => setFormName(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
+            <label className="block text-xs text-neutral-400 font-bold uppercase">Type</label>
+            <select value={formType} onChange={(e) => setFormType(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white">
               {['activity', 'guide', 'hotel', 'transport'].map((t) => (
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
-            <label className="block text-xs text-slate-400 font-bold uppercase">Email</label>
-            <input type="text" value={formEmail} onChange={(e) => setFormEmail(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
-            <label className="block text-xs text-slate-400 font-bold uppercase">Phone</label>
-            <input type="text" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+            <label className="block text-xs text-neutral-400 font-bold uppercase">Email</label>
+            <input type="text" value={formEmail} onChange={(e) => setFormEmail(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
+            <label className="block text-xs text-neutral-400 font-bold uppercase">Phone</label>
+            <input type="text" value={formPhone} onChange={(e) => setFormPhone(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
             <div className="flex justify-end gap-2">
-              <button onClick={() => setOnboardOpen(false)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancel</button>
-              <button onClick={submitOnboard} disabled={submitting} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
+              <button onClick={() => setOnboardOpen(false)} className="px-4 py-2 rounded-xl bg-neutral-800 text-neutral-300 text-xs font-bold">Cancel</button>
+              <button onClick={submitOnboard} disabled={submitting} className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold disabled:opacity-50">
                 {submitting ? 'Saving...' : 'Onboard'}
               </button>
             </div>
@@ -813,10 +813,10 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
 
       {detail && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-lg w-full space-y-3 max-h-[85vh] overflow-y-auto">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 max-w-lg w-full space-y-3 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white">Assignment Detail</h3>
-              <button onClick={() => setDetailId(null)} className="p-1 text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setDetailId(null)} className="p-1 text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
             {([
               ['Trip', `${detail.trip_id}${tripById.get(detail.trip_id) ? ` — ${tripById.get(detail.trip_id)?.title}` : ''}`],
@@ -835,27 +835,27 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
                   : 'No traveler activity picks on this trip';
               })()],
             ] as [string, string][]).map(([label, value]) => (
-              <div key={label} className="flex items-start justify-between gap-3 text-xs p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80">
-                <span className="text-slate-500 uppercase font-bold text-[10px] pt-0.5">{label}</span>
-                <span className="text-slate-200 font-semibold text-right">{value}</span>
+              <div key={label} className="flex items-start justify-between gap-3 text-xs p-2.5 rounded-xl bg-neutral-950/60 border border-neutral-800/80">
+                <span className="text-neutral-500 uppercase font-bold text-[10px] pt-0.5">{label}</span>
+                <span className="text-neutral-200 font-semibold text-right">{value}</span>
               </div>
             ))}
             <div className="flex justify-end gap-2 pt-1">
               {detail.status === 'pending' && (
-                <button onClick={() => { setDetailId(null); handleConfirm(detail.id); }} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Confirm</button>
+                <button onClick={() => { setDetailId(null); handleConfirm(detail.id); }} className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold">Confirm</button>
               )}
               {detail.status === 'issue' ? (
-                <button onClick={() => { setDetailId(null); handleResolve(detail.id); }} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">Resolve</button>
+                <button onClick={() => { setDetailId(null); handleResolve(detail.id); }} className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold">Resolve</button>
               ) : (
-                <button onClick={() => { setDetailId(null); setConfirmTarget(detail.id); setFormReason(''); }} className="px-4 py-2 rounded-xl bg-slate-800 text-amber-300 text-xs font-bold border border-slate-700">Flag Issue</button>
+                <button onClick={() => { setDetailId(null); setConfirmTarget(detail.id); setFormReason(''); }} className="px-4 py-2 rounded-xl bg-neutral-800 text-amber-300 text-xs font-bold border border-neutral-700">Flag Issue</button>
               )}
-              <button onClick={() => { setDetailId(null); onSelectTrip(detail.trip_id); }} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-200 text-xs font-bold border border-slate-700">Open Trip →</button>
+              <button onClick={() => { setDetailId(null); onSelectTrip(detail.trip_id); }} className="px-4 py-2 rounded-xl bg-neutral-800 text-neutral-200 text-xs font-bold border border-neutral-700">Open Trip →</button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="flex items-center gap-4 text-[11px] text-slate-500">
+      <div className="flex items-center gap-4 text-[11px] text-neutral-500">
         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Auto-refresh 30s</span>
         <span className="flex items-center gap-1"><Users className="w-3 h-3" /> Price = backend unit rate × participants; capacity enforced server-side (409 on over-allocation).</span>
       </div>

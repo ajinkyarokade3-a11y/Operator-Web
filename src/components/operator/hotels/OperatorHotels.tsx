@@ -246,25 +246,25 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
   };
 
   const renderManifest = (trip: Trip) => (
-    <div className="mt-3 p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-xs space-y-2">
-      <div className="font-bold text-slate-200 flex items-center gap-1.5">
-        <Users className="w-3.5 h-3.5 text-sky-400" />
+    <div className="mt-3 p-3 rounded-xl bg-neutral-950/70 border border-neutral-800 text-xs space-y-2">
+      <div className="font-bold text-neutral-200 flex items-center gap-1.5">
+        <Users className="w-3.5 h-3.5 text-neutral-200" />
         <span>Guest Manifest — traveler party of {trip.traveler_count}</span>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-400">
-        <div>Companions: <strong className="text-slate-200">{trip.preferences?.travel_companions || '—'}</strong></div>
-        <div>Dates: <strong className="text-slate-200">{trip.start_date?.slice(0, 10) || '?'} → {trip.end_date?.slice(0, 10) || '?'}</strong></div>
-        <div>Dietary: <strong className="text-slate-200">{(trip.preferences?.dietary_requirements || []).join(', ') || '—'}</strong></div>
-        <div>Requests: <strong className="text-slate-200">{trip.preferences?.special_requests || '—'}</strong></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-neutral-400">
+        <div>Companions: <strong className="text-neutral-200">{trip.preferences?.travel_companions || '—'}</strong></div>
+        <div>Dates: <strong className="text-neutral-200">{trip.start_date?.slice(0, 10) || '?'} → {trip.end_date?.slice(0, 10) || '?'}</strong></div>
+        <div>Dietary: <strong className="text-neutral-200">{(trip.preferences?.dietary_requirements || []).join(', ') || '—'}</strong></div>
+        <div>Requests: <strong className="text-neutral-200">{trip.preferences?.special_requests || '—'}</strong></div>
       </div>
       <div>
-        <div className="text-slate-500 uppercase text-[10px] font-bold mb-1">Bookings ({trip.bookings?.length || 0})</div>
+        <div className="text-neutral-500 uppercase text-[10px] font-bold mb-1">Bookings ({trip.bookings?.length || 0})</div>
         {(trip.bookings || []).length === 0 ? (
-          <div className="text-slate-500">No bookings recorded for this trip.</div>
+          <div className="text-neutral-500">No bookings recorded for this trip.</div>
         ) : (
           <div className="space-y-1">
             {trip.bookings.map((b) => (
-              <div key={b.id} className="flex flex-wrap gap-x-3 font-mono text-[11px] text-slate-300">
+              <div key={b.id} className="flex flex-wrap gap-x-3 font-mono text-[11px] text-neutral-300">
                 <span>{b.booking_reference}</span>
                 <span>{b.item_type}</span>
                 <span>₹{b.amount.toLocaleString()}</span>
@@ -287,13 +287,13 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
               TRIP → RESOURCE → STATUS → ACTION
             </span>
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-neutral-400 mt-0.5">
             Live accommodation assignments persisted in the operations database. Auto-refreshes every 30s.
           </p>
         </div>
         <button
           onClick={() => refresh()}
-          className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 text-xs font-bold flex items-center gap-1.5 hover:text-white"
+          className="px-3 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-neutral-300 text-xs font-bold flex items-center gap-1.5 hover:text-white"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Refresh
         </button>
@@ -305,10 +305,10 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
         </div>
       )}
       {focusTripId && (
-        <div className="p-3 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-bold flex items-center justify-between gap-2">
+        <div className="p-3 rounded-xl bg-neutral-500/10 border border-neutral-500/30 text-neutral-300 text-xs font-bold flex items-center justify-between gap-2">
           <span>Assigning services for trip <span className="font-mono">{focusTripId}</span> — list filtered to this trip.</span>
           {onClearFocus && (
-            <button onClick={onClearFocus} className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px]">Show all</button>
+            <button onClick={onClearFocus} className="px-2 py-0.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-[11px]">Show all</button>
           )}
         </div>
       )}
@@ -323,7 +323,7 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
           <button
             key={v}
             onClick={() => setView(v)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold capitalize ${view === v ? 'bg-emerald-600 text-white' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200'}`}
+            className={`px-4 py-2 rounded-xl text-xs font-bold capitalize ${view === v ? 'bg-white text-black' : 'bg-neutral-900 border border-neutral-800 text-neutral-400 hover:text-neutral-200'}`}
           >
             {v === 'assignments' ? `Trip Assignments (${rows.length})` : `Properties (${properties.length})`}
           </button>
@@ -332,13 +332,13 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
 
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+          <Search className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={view === 'assignments' ? 'Search trip ID, title, or hotel...' : 'Search property, address, destination...'}
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-neutral-400"
           />
         </div>
         {view === 'assignments' && (
@@ -346,7 +346,7 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as 'all' | AccommodationStatus)}
-              className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200"
+              className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-200"
             >
               <option value="all">All statuses</option>
               <option value="pending">Pending</option>
@@ -356,7 +356,7 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
             <select
               value={sortKey}
               onChange={(e) => setSortKey(e.target.value as 'updated' | 'trip' | 'hotel')}
-              className="bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200"
+              className="bg-neutral-900 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-neutral-200"
             >
               <option value="updated">Sort: recently updated</option>
               <option value="trip">Sort: trip ID</option>
@@ -367,11 +367,11 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
       </div>
 
       {loading ? (
-        <div className="text-center py-12 text-slate-500 text-sm">Loading operations data...</div>
+        <div className="text-center py-12 text-neutral-500 text-sm">Loading operations data...</div>
       ) : view === 'assignments' ? (
         filtered.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-            <Building2 className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center text-neutral-400">
+            <Building2 className="w-8 h-8 text-neutral-500 mx-auto mb-2" />
             <div className="font-bold text-white text-sm">No Trip Assignments</div>
             <p className="text-xs mt-1">No trips match the current search or status filter.</p>
           </div>
@@ -383,59 +383,59 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
               // Traveler selection vs operational assignment (same trip record).
               const rowView = hotelRowView(trip, assignment);
               return (
-                <div key={trip.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+                <div key={trip.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span className="font-mono text-xs font-bold text-sky-400 truncate">{trip.id}</span>
-                      <span className="text-xs text-slate-400 truncate hidden sm:inline">{trip.title}</span>
+                      <span className="font-mono text-xs font-bold text-neutral-200 truncate">{trip.id}</span>
+                      <span className="text-xs text-neutral-400 truncate hidden sm:inline">{trip.title}</span>
                       <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${STATUS_STYLES[status]}`}>
                         {status}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5 flex-wrap">
                       {!assignment ? (
-                        <button onClick={() => openDialog('assign', trip.id)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg flex items-center gap-1">
+                        <button onClick={() => openDialog('assign', trip.id)} className="px-3 py-1.5 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-lg flex items-center gap-1">
                           <Plus className="w-3 h-3" /> Assign Hotel
                         </button>
                       ) : (
                         <>
-                          <button onClick={() => openDialog('change', trip.id)} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1">
+                          <button onClick={() => openDialog('change', trip.id)} className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700 flex items-center gap-1">
                             <Pencil className="w-3 h-3" /> Change
                           </button>
-                          <button onClick={() => openDialog('rooms', trip.id)} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1">
+                          <button onClick={() => openDialog('rooms', trip.id)} className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700 flex items-center gap-1">
                             <BedDouble className="w-3 h-3" /> Rooms
                           </button>
                           {status === 'issue' ? (
-                            <button onClick={() => handleResolve(trip.id)} className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1">
+                            <button onClick={() => handleResolve(trip.id)} className="px-3 py-1.5 bg-white hover:bg-neutral-200 text-black text-xs font-semibold rounded-lg flex items-center gap-1">
                               <CheckCircle2 className="w-3 h-3" /> Resolve
                             </button>
                           ) : (
-                            <button onClick={() => openDialog('issue', trip.id)} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1">
+                            <button onClick={() => openDialog('issue', trip.id)} className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-amber-300 text-xs font-semibold rounded-lg border border-neutral-700 flex items-center gap-1">
                               <AlertTriangle className="w-3 h-3" /> Flag Issue
                             </button>
                           )}
                         </>
                       )}
-                      <button onClick={() => setExpandedTrip(expandedTrip === trip.id ? null : trip.id)} className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700 flex items-center gap-1">
+                      <button onClick={() => setExpandedTrip(expandedTrip === trip.id ? null : trip.id)} className="px-3 py-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700 flex items-center gap-1">
                         <Eye className="w-3 h-3" /> Manifest
                       </button>
-                      <button onClick={() => onSelectTrip(trip.id)} className="px-3 py-1.5 text-slate-400 hover:text-white text-xs font-semibold">
+                      <button onClick={() => onSelectTrip(trip.id)} className="px-3 py-1.5 text-neutral-400 hover:text-white text-xs font-semibold">
                         Open →
                       </button>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                    <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-                      <div className="text-[10px] uppercase text-slate-500 font-bold">Property</div>
-                      <div className="text-slate-200 font-semibold truncate">
+                    <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+                      <div className="text-[10px] uppercase text-neutral-500 font-bold">Property</div>
+                      <div className="text-neutral-200 font-semibold truncate">
                         {rowView.propertyName || 'No traveler selection'}
                       </div>
                       {rowView.propertySource === 'assigned' && assignment?.hotel?.address && (
-                        <div className="text-slate-500 truncate text-[11px]">{assignment.hotel.address}</div>
+                        <div className="text-neutral-500 truncate text-[11px]">{assignment.hotel.address}</div>
                       )}
                       <div className="text-[11px] mt-1 space-y-0.5">
-                        <div className={rowView.travelerHotelName ? 'text-sky-300/90' : 'text-slate-500'}>
+                        <div className={rowView.travelerHotelName ? 'text-neutral-300/90' : 'text-neutral-500'}>
                           {rowView.travelerHotelName
                             ? `Traveler selection: ✓ ${rowView.travelerHotelName}${rowView.travelerHotelPricePerNight != null ? ` (₹${rowView.travelerHotelPricePerNight.toLocaleString()}/night)` : ''}`
                             : 'Traveler selection: —'}
@@ -449,23 +449,23 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
                         </div>
                       </div>
                     </div>
-                    <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-                      <div className="text-[10px] uppercase text-slate-500 font-bold">Rooms</div>
-                      <div className="text-slate-200 font-semibold">
+                    <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+                      <div className="text-[10px] uppercase text-neutral-500 font-bold">Rooms</div>
+                      <div className="text-neutral-200 font-semibold">
                         {assignment?.rooms != null ? `${assignment.rooms} × ${assignment.room_type || 'standard'}` : '—'}
                       </div>
-                      <div className="text-slate-500 text-[11px]">{assignment?.check_in_date || '?'} → {assignment?.check_out_date || '?'}</div>
+                      <div className="text-neutral-500 text-[11px]">{assignment?.check_in_date || '?'} → {assignment?.check_out_date || '?'}</div>
                     </div>
-                    <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-                      <div className="text-[10px] uppercase text-slate-500 font-bold">Price</div>
+                    <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+                      <div className="text-[10px] uppercase text-neutral-500 font-bold">Price</div>
                       <div className="text-emerald-400 font-bold font-mono">
                         {nightly > 0 && nights ? `₹${(nightly * nights).toLocaleString()}` : '—'}
                       </div>
-                      <div className="text-slate-500 text-[11px]">{nightly > 0 ? `₹${nightly.toLocaleString()}/night × ${nights ?? '?'}n` : 'no rate'}</div>
+                      <div className="text-neutral-500 text-[11px]">{nightly > 0 ? `₹${nightly.toLocaleString()}/night × ${nights ?? '?'}n` : 'no rate'}</div>
                     </div>
-                    <div className="bg-slate-950/60 rounded-xl p-2.5 border border-slate-800/80">
-                      <div className="text-[10px] uppercase text-slate-500 font-bold">Attention</div>
-                      <div className="text-slate-200 font-semibold text-[11px] leading-snug">
+                    <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
+                      <div className="text-[10px] uppercase text-neutral-500 font-bold">Attention</div>
+                      <div className="text-neutral-200 font-semibold text-[11px] leading-snug">
                         {status === 'pending' && (rowView.travelerHotelName ? 'Assign inventory property for traveler pick.' : 'No traveler pick; assign from inventory.')}
                         {status === 'assigned' && 'Operational. Monitor dates and rooms.'}
                         {status === 'issue' && (assignment?.issue_reason || 'Needs attention.')}
@@ -480,21 +480,21 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
           </div>
         )
       ) : filteredProperties.length === 0 ? (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
-          <Building2 className="w-8 h-8 text-slate-500 mx-auto mb-2" />
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center text-neutral-400">
+          <Building2 className="w-8 h-8 text-neutral-500 mx-auto mb-2" />
           <div className="font-bold text-white text-sm">No Properties Found</div>
           <p className="text-xs mt-1">No inventory properties match the current search.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filteredProperties.map((p) => (
-            <div key={p.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-3">
+            <div key={p.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div>
-                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-800 text-sky-300 border border-slate-700">{p.category}</span>
+                  <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-neutral-800 text-neutral-300 border border-neutral-700">{p.category}</span>
                   <h3 className="text-base font-bold text-white mt-1.5">{p.name}</h3>
-                  <div className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
-                    <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                  <div className="text-xs text-neutral-400 flex items-center gap-1 mt-0.5">
+                    <MapPin className="w-3.5 h-3.5 text-neutral-500" />
                     <span>{p.address || p.destination_name || '—'}</span>
                   </div>
                 </div>
@@ -503,25 +503,25 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
                 </div>
               </div>
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Trips using this property: <strong className="text-white font-mono">{p.assigned_trip_count}</strong></span>
+                <span className="text-neutral-400">Trips using this property: <strong className="text-white font-mono">{p.assigned_trip_count}</strong></span>
                 <span className="font-mono text-emerald-400 font-bold">₹{p.price_per_night.toLocaleString()}/night</span>
               </div>
               <button
                 onClick={() => toggleProperty(p.id)}
-                className="w-full px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-lg border border-slate-700"
+                className="w-full px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-semibold rounded-lg border border-neutral-700"
               >
                 {expandedProperty === p.id ? 'Hide assigned trips' : `View assigned trips (${p.assigned_trip_count})`}
               </button>
               {expandedProperty === p.id && (
                 <div className="space-y-1.5">
                   {(propertyTrips[p.id] || []).length === 0 ? (
-                    <div className="text-xs text-slate-500">No trips currently assigned to this property.</div>
+                    <div className="text-xs text-neutral-500">No trips currently assigned to this property.</div>
                   ) : (
                     (propertyTrips[p.id] || []).map((a) => (
-                      <div key={a.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-slate-950 border border-slate-800 text-xs">
-                        <span className="font-mono text-sky-400 truncate">{a.trip_id}</span>
+                      <div key={a.id} className="flex items-center justify-between gap-2 p-2 rounded-lg bg-neutral-950 border border-neutral-800 text-xs">
+                        <span className="font-mono text-neutral-200 truncate">{a.trip_id}</span>
                         <span className={`px-2 py-0.5 rounded-full border text-[10px] font-bold uppercase ${STATUS_STYLES[a.status]}`}>{a.status}</span>
-                        <button onClick={() => onSelectTrip(a.trip_id)} className="text-slate-400 hover:text-white font-semibold">Open →</button>
+                        <button onClick={() => onSelectTrip(a.trip_id)} className="text-neutral-400 hover:text-white font-semibold">Open →</button>
                       </div>
                     ))
                   )}
@@ -534,7 +534,7 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
 
       {dialog && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-lg w-full space-y-4 max-h-[85vh] overflow-y-auto">
+          <div className="bg-neutral-900 border border-neutral-700 rounded-2xl p-6 max-w-lg w-full space-y-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-bold text-white">
                 {dialog.mode === 'assign' && `Assign Hotel — ${dialog.tripId}`}
@@ -542,16 +542,16 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
                 {dialog.mode === 'rooms' && `Room Allocation — ${dialog.tripId}`}
                 {dialog.mode === 'issue' && `Flag Issue — ${dialog.tripId}`}
               </h3>
-              <button onClick={() => setDialog(null)} className="p-1 text-slate-400 hover:text-white"><X className="w-5 h-5" /></button>
+              <button onClick={() => setDialog(null)} className="p-1 text-neutral-400 hover:text-white"><X className="w-5 h-5" /></button>
             </div>
 
             {(dialog.mode === 'assign' || dialog.mode === 'change') && (
               <>
-                <label className="block text-xs text-slate-400 font-bold uppercase">Property (live inventory)</label>
+                <label className="block text-xs text-neutral-400 font-bold uppercase">Property (live inventory)</label>
                 {prefillHint && (
-                  <p className="text-[11px] text-sky-300/90 bg-sky-500/10 border border-sky-500/20 rounded-xl px-3 py-2">{prefillHint}</p>
+                  <p className="text-[11px] text-neutral-300/90 bg-neutral-500/10 border border-neutral-500/20 rounded-xl px-3 py-2">{prefillHint}</p>
                 )}
-                <select value={formHotelId} onChange={(e) => setFormHotelId(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white">
+                <select value={formHotelId} onChange={(e) => setFormHotelId(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white">
                   <option value="">— No property (pending) —</option>
                   {properties.map((p) => (
                     <option key={p.id} value={p.id}>{p.name} — {p.destination_name || ''} (₹{p.price_per_night.toLocaleString()}/night)</option>
@@ -563,22 +563,22 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
             {(dialog.mode === 'assign' || dialog.mode === 'change' || dialog.mode === 'rooms') && (
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-slate-400 font-bold uppercase mb-1">Rooms</label>
-                  <input type="number" min={0} value={formRooms} onChange={(e) => setFormRooms(e.target.value)} placeholder="e.g. 2" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                  <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">Rooms</label>
+                  <input type="number" min={0} value={formRooms} onChange={(e) => setFormRooms(e.target.value)} placeholder="e.g. 2" className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-400 font-bold uppercase mb-1">Room type</label>
-                  <input type="text" value={formRoomType} onChange={(e) => setFormRoomType(e.target.value)} placeholder="e.g. Deluxe Suite" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                  <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">Room type</label>
+                  <input type="text" value={formRoomType} onChange={(e) => setFormRoomType(e.target.value)} placeholder="e.g. Deluxe Suite" className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
                 </div>
                 {(dialog.mode === 'assign' || dialog.mode === 'change') && (
                   <>
                     <div>
-                      <label className="block text-xs text-slate-400 font-bold uppercase mb-1">Check-in</label>
-                      <input type="date" value={formCheckIn} onChange={(e) => setFormCheckIn(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                      <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">Check-in</label>
+                      <input type="date" value={formCheckIn} onChange={(e) => setFormCheckIn(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
                     </div>
                     <div>
-                      <label className="block text-xs text-slate-400 font-bold uppercase mb-1">Check-out</label>
-                      <input type="date" value={formCheckOut} onChange={(e) => setFormCheckOut(e.target.value)} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                      <label className="block text-xs text-neutral-400 font-bold uppercase mb-1">Check-out</label>
+                      <input type="date" value={formCheckOut} onChange={(e) => setFormCheckOut(e.target.value)} className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
                     </div>
                   </>
                 )}
@@ -587,14 +587,14 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
 
             {dialog.mode === 'issue' && (
               <>
-                <label className="block text-xs text-slate-400 font-bold uppercase">Issue reason</label>
-                <textarea value={formReason} onChange={(e) => setFormReason(e.target.value)} rows={3} placeholder="e.g. Property overbooked for these dates" className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white" />
+                <label className="block text-xs text-neutral-400 font-bold uppercase">Issue reason</label>
+                <textarea value={formReason} onChange={(e) => setFormReason(e.target.value)} rows={3} placeholder="e.g. Property overbooked for these dates" className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2 text-xs text-white" />
               </>
             )}
 
             <div className="flex justify-end gap-2">
-              <button onClick={() => setDialog(null)} className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold">Cancel</button>
-              <button onClick={submitDialog} disabled={submitting} className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold disabled:opacity-50">
+              <button onClick={() => setDialog(null)} className="px-4 py-2 rounded-xl bg-neutral-800 text-neutral-300 text-xs font-bold">Cancel</button>
+              <button onClick={submitDialog} disabled={submitting} className="px-4 py-2 rounded-xl bg-white hover:bg-neutral-200 text-black text-xs font-bold disabled:opacity-50">
                 {submitting ? 'Saving...' : dialog.mode === 'issue' ? 'Flag Issue' : 'Save Assignment'}
               </button>
             </div>
@@ -602,7 +602,7 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
         </div>
       )}
 
-      <div className="flex items-center gap-4 text-[11px] text-slate-500">
+      <div className="flex items-center gap-4 text-[11px] text-neutral-500">
         <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Auto-refresh 30s</span>
         <span>Statuses derive from backend assignment data: no hotel → pending, hotel + rooms → assigned, conflict/missing info → issue.</span>
       </div>

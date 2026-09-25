@@ -32,6 +32,7 @@ export const Badge: React.FC<BadgeProps> = ({ variant = 'default', size = 'sm', 
       fontSize: size === 'sm' ? '10px' : '11px',
       padding: size === 'sm' ? '2px 8px' : '3px 10px',
       lineHeight: 1.4,
+      boxShadow: 'var(--highlight-top-subtle)',
       ...variantMap[variant],
       ...style,
     }}

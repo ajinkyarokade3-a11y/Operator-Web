@@ -20,7 +20,7 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Safety & Incident Desk</h1>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-sm text-neutral-400 mt-0.5">
             Real-time weather sensor alerts, road closure advisories, and airline delay tracking.
           </p>
         </div>
@@ -29,7 +29,7 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
           <span className="px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-300 border border-rose-500/30 font-semibold">
             {unresolved.length} Active Incidents
           </span>
-          <span className="px-3 py-1.5 rounded-lg bg-slate-900 text-slate-400 border border-slate-800">
+          <span className="px-3 py-1.5 rounded-lg bg-neutral-900 text-neutral-400 border border-neutral-800">
             {resolved.length} Resolved
           </span>
         </div>
@@ -37,12 +37,12 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
 
       {/* Active Incidents */}
       <div className="space-y-3">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+        <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
           Active Urgent Incidents ({unresolved.length})
         </h2>
 
         {unresolved.length === 0 ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 text-center text-neutral-400">
             <CheckCircle2 className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
             <div className="font-bold text-white text-sm">All Sectors Operational</div>
             <p className="text-xs mt-1">No active safety warnings or grounded activities.</p>
@@ -51,7 +51,7 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
           unresolved.map((alert) => (
             <div
               key={alert.id}
-              className="bg-slate-900 border border-rose-500/40 rounded-2xl p-5 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4"
+              className="bg-neutral-900 border border-rose-500/40 rounded-2xl p-5 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4"
             >
               <div className="flex items-start space-x-3.5">
                 <div className="p-2.5 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30 flex-shrink-0 mt-0.5 animate-pulse">
@@ -63,11 +63,11 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
                     <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
                       {alert.severity} • {alert.alert_type}
                     </span>
-                    <span className="text-xs font-mono text-slate-400">Tour #{alert.trip_id}</span>
+                    <span className="text-xs font-mono text-neutral-400">Tour #{alert.trip_id}</span>
                   </div>
 
                   <h3 className="text-sm font-bold text-white">{alert.title}</h3>
-                  <p className="text-xs text-slate-300 max-w-2xl leading-relaxed">{alert.description}</p>
+                  <p className="text-xs text-neutral-300 max-w-2xl leading-relaxed">{alert.description}</p>
                 </div>
               </div>
 
@@ -82,7 +82,7 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
                 </button>
                 <button
                   onClick={() => onResolveAlert(alert.id)}
-                  className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl border border-slate-700 transition-colors"
+                  className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-medium rounded-xl border border-neutral-700 transition-colors"
                 >
                   Mark Dismissed
                 </button>
@@ -95,7 +95,7 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
       {/* Resolved History */}
       {resolved.length > 0 && (
         <div className="space-y-3 pt-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-neutral-400">
             Resolved Incidents ({resolved.length})
           </h2>
 
@@ -103,12 +103,12 @@ export const OperatorAlerts: React.FC<OperatorAlertsProps> = ({
             {resolved.map((alert) => (
               <div
                 key={alert.id}
-                className="bg-slate-950 border border-slate-800/80 rounded-xl p-4 flex items-center justify-between text-xs text-slate-400"
+                className="bg-neutral-950 border border-neutral-800/80 rounded-xl p-4 flex items-center justify-between text-xs text-neutral-400"
               >
                 <div className="flex items-center space-x-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="font-semibold text-slate-200">{alert.title}</span>
-                  <span className="text-slate-500 font-mono">#{alert.trip_id}</span>
+                  <span className="font-semibold text-neutral-200">{alert.title}</span>
+                  <span className="text-neutral-500 font-mono">#{alert.trip_id}</span>
                 </div>
                 <span className="text-emerald-400 font-medium text-[11px]">Resolved</span>
               </div>

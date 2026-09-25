@@ -76,7 +76,7 @@ const AnimatedItem = ({ children, delay = 0, index, onMouseEnter, onClick, conta
       transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1], delay: delay * 0.2 }}
       style={{ marginBottom: '0.5rem', cursor: 'pointer', transformOrigin: 'center center', willChange: 'transform, opacity' }}
     >
-      <div style={{ transition: 'box-shadow 0.24s ease', boxShadow: displayScale > 1.12 ? '0 0 0 1px rgba(255,255,255,0.07), 0 6px 20px rgba(0,0,0,0.30)' : 'none', borderRadius: 12 }}>
+      <div style={{ transition: 'box-shadow 0.24s ease', boxShadow: displayScale > 1.12 ? '0 0 0 1px var(--color-border), var(--shadow-subtle)' : 'none', borderRadius: 12 }}>
         {children}
       </div>
     </motion.div>

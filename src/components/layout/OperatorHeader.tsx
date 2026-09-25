@@ -29,8 +29,8 @@ export const OperatorHeader: React.FC<OperatorHeaderProps> = ({
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-secondary) 100%)',
-            boxShadow: '0 0 16px var(--color-accent-glow)', color: '#fff', flexShrink: 0,
+            background: 'linear-gradient(135deg, #2B2B2B 0%, #101010 100%)',
+            border: '1px solid var(--color-border-strong)', color: '#fff', flexShrink: 0,
           }}>
             <Compass size={18} />
           </div>
@@ -68,7 +68,7 @@ export const OperatorHeader: React.FC<OperatorHeaderProps> = ({
           <div style={{ width: 1, height: 24, background: 'var(--color-border)', margin: '0 2px' }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{ width: 30, height: 30, borderRadius: 999, background: 'linear-gradient(135deg,var(--color-accent) 0%, var(--color-accent-secondary) 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 11 }}>
+            <div style={{ width: 30, height: 30, borderRadius: 999, background: 'linear-gradient(135deg,#2B2B2B 0%, #101010 100%)', border: '1px solid var(--color-border-strong)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 800, fontSize: 11 }}>
               {operatorUser.name.split(' ').map(s=>s[0]).join('').slice(0,2).toUpperCase()}
             </div>
           </div>
