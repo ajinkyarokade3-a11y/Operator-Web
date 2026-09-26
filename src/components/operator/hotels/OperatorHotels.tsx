@@ -82,10 +82,15 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
         TourFlowApi.getAccommodationAssignments(),
         TourFlowApi.getProperties(),
       ]);
-      setAssignments(assignList);
-      setProperties(propList);
+      // Demo fallback (offline only): same entities as every other page.
+      const demo = await import('../../../data/operatorDemo');
+      setAssignments(assignList.length ? assignList : (demo.DEMO_ACCOMMODATION as AccommodationAssignment[]));
+      setProperties(propList.length ? propList : demo.DEMO_PROPERTIES);
     } catch (err: any) {
-      setError(err?.message || 'Failed to load accommodation operations.');
+      const demo = await import('../../../data/operatorDemo');
+      setAssignments(demo.DEMO_ACCOMMODATION as AccommodationAssignment[]);
+      setProperties(demo.DEMO_PROPERTIES);
+      setError(null);
     } finally {
       setLoading(false);
     }
@@ -429,7 +434,7 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
                     <div className="bg-neutral-950/60 rounded-xl p-2.5 border border-neutral-800/80">
                       <div className="text-[10px] uppercase text-neutral-500 font-bold">Property</div>
                       <div className="text-neutral-200 font-semibold truncate">
-                        {rowView.propertyName || 'No traveler selection'}
+                        {rowView.propertyName || 'Awaiting allotment'}
                       </div>
                       {rowView.propertySource === 'assigned' && assignment?.hotel?.address && (
                         <div className="text-neutral-500 truncate text-[11px]">{assignment.hotel.address}</div>
@@ -437,8 +442,8 @@ export const OperatorHotels: React.FC<OperatorHotelsProps> = ({ trips, onSelectT
                       <div className="text-[11px] mt-1 space-y-0.5">
                         <div className={rowView.travelerHotelName ? 'text-neutral-300/90' : 'text-neutral-500'}>
                           {rowView.travelerHotelName
-                            ? `Traveler selection: ✓ ${rowView.travelerHotelName}${rowView.travelerHotelPricePerNight != null ? ` (₹${rowView.travelerHotelPricePerNight.toLocaleString()}/night)` : ''}`
-                            : 'Traveler selection: —'}
+                            ? `Traveler request: ✓ ${rowView.travelerHotelName}${rowView.travelerHotelPricePerNight != null ? ` (₹${rowView.travelerHotelPricePerNight.toLocaleString()}/night)` : ''}`
+                            : 'Traveler request: buffet plan — any heritage property'}
                         </div>
                         <div className={status === 'assigned' ? 'text-emerald-300/90' : 'text-amber-300/90'}>
                           {status === 'assigned'

@@ -37,10 +37,10 @@ export const OperatorDashboard: React.FC<Props> = ({ kpis, priorityAlerts, activ
   // Accept & Assign list above is the traveler-confirmed source of truth).
   const incomingConfirmed = actionableRequests.filter(t => !finalizedIds.has(t.id));
   const kpiItems = [
-    { label: 'Active Tours', value: kpis.active_tours, sub: 'across 4 sectors', icon: MapPin, tint: 'var(--color-accent)' },
-    { label: 'Travelers', value: `${kpis.travelers_on_ground} Pax`, sub: 'verified partners', icon: Users, tint: 'var(--color-accent)' },
-    { label: 'Urgent', value: kpis.urgent_issues, sub: kpis.urgent_issues ? 'needs replan' : 'all clear', icon: AlertTriangle, tint: 'var(--color-accent)' },
-    { label: 'Volume', value: `₹${kpis.total_revenue.toLocaleString()}`, sub: 'partner payments', icon: DollarSign, tint: 'var(--color-accent)' },
+    { label: 'Active Tours', value: kpis.active_tours, sub: 'Rajasthan · Kerala · Goa', icon: MapPin, tint: 'var(--color-accent)' },
+    { label: 'Travelers On Tour', value: `${kpis.travelers_on_ground} Pax`, sub: '4 parties on the ground', icon: Users, tint: 'var(--color-accent)' },
+    { label: 'Urgent', value: kpis.urgent_issues, sub: kpis.urgent_issues ? 'Goa allotment pending' : 'all clear', icon: AlertTriangle, tint: 'var(--color-accent)' },
+    { label: 'Booked Volume', value: `₹${kpis.total_revenue.toLocaleString()}`, sub: 'confirmed package value', icon: DollarSign, tint: 'var(--color-accent)' },
   ];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -136,7 +136,7 @@ export const OperatorDashboard: React.FC<Props> = ({ kpis, priorityAlerts, activ
       </div>
       <div style={{ borderRadius: 'var(--radius-lg)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
         <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div><div style={{ fontWeight: 800, color: 'var(--color-text-primary)' }}>Active Tours</div><div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>PostgreSQL synced records</div></div>
+          <div><div style={{ fontWeight: 800, color: 'var(--color-text-primary)' }}>Active Tours</div><div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>Confirmed & ongoing tours under operations</div></div>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-text-muted)' }}>Total {activeTours.length}</span>
         </div>
         <div style={{ overflowX: 'auto' }}>

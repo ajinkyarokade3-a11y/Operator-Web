@@ -60,7 +60,7 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
   const pendingRequests = trips.filter((t) => t.status === 'planning' || t.status === 'draft');
   const previewTrips = trips.filter(isPreview);
   const actionableTrips = trips.filter(isActionable);
-  const allRequests = trips.filter((t) => t.id !== 'trp-manali-alpine-demo-001');
+  const allRequests = trips;
 
   const filtered = allRequests.filter((t) => {
     const matchesSearch =

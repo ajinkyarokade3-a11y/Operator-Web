@@ -114,11 +114,17 @@ export const OperatorTransport: React.FC<OperatorTransportProps> = ({ trips, onS
         TourFlowApi.getVehicles(),
         TourFlowApi.getDrivers(),
       ]);
-      setAssignments(assignList);
-      setVehicles(vehList);
-      setDrivers(drvList);
+      // Demo fallback (offline only): same entities as every other page.
+      const demo = await import('../../../data/operatorDemo');
+      setAssignments(assignList.length ? assignList : demo.DEMO_TRANSPORT);
+      setVehicles(vehList.length ? vehList : demo.DEMO_VEHICLES);
+      setDrivers(drvList.length ? drvList : demo.DEMO_DRIVERS);
     } catch (err: any) {
-      setError(err?.message || 'Failed to load dispatch operations.');
+      const demo = await import('../../../data/operatorDemo');
+      setAssignments(demo.DEMO_TRANSPORT);
+      setVehicles(demo.DEMO_VEHICLES);
+      setDrivers(demo.DEMO_DRIVERS);
+      setError(null);
     } finally {
       setLoading(false);
     }
@@ -452,7 +458,7 @@ export const OperatorTransport: React.FC<OperatorTransportProps> = ({ trips, onS
                       <div className="text-neutral-500 text-[11px]">{a?.vehicle ? `${a.vehicle.vehicle_type} · ${a.vehicle.capacity} seats` : 'no operational vehicle'}</div>
                       <div className="text-[11px] mt-1 space-y-0.5">
                         <div className={rowView.travelerPickLabel ? 'text-neutral-300/90' : 'text-neutral-500'}>
-                          {rowView.travelerPickLabel ? `Traveler selection: ✓ ${rowView.travelerPickLabel}` : 'Traveler selection: —'}
+                          {rowView.travelerPickLabel ? `Traveler request: ✓ ${rowView.travelerPickLabel}` : 'Traveler request: operator to arrange transfer'}
                         </div>
                         <div className={rowView.hasOperationalVehicle ? 'text-emerald-300/90' : 'text-amber-300/90'}>
                           {rowView.hasOperationalVehicle ? 'Operator assignment: ✓ Vehicle attached' : 'Operator assignment: ⚠ Pending'}

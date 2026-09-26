@@ -30,7 +30,7 @@ export const OperatorItineraries: React.FC<OperatorItinerariesProps> = ({
   onOpenReplanForTrip,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTripId, setSelectedTripId] = useState<string>(trips[0]?.id || '1024');
+  const [selectedTripId, setSelectedTripId] = useState<string>(trips[0]?.id || 'TRP-RJ-2041');
 
   const activeTrip = trips.find((t) => t.id === selectedTripId) || trips[0];
 

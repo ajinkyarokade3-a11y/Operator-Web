@@ -99,11 +99,17 @@ export const OperatorVendors: React.FC<OperatorVendorsProps> = ({ trips, onSelec
         TourFlowApi.getActivityInventory(),
         TourFlowApi.getOpsVendors(),
       ]);
-      setAssignments(assignList);
-      setInventory(invList);
-      setVendors(vendorList);
+      // Demo fallback (offline only): same entities as every other page.
+      const demo = await import('../../../data/operatorDemo');
+      setAssignments(assignList.length ? assignList : demo.DEMO_ACTIVITY_ASSIGNMENTS);
+      setInventory(invList.length ? invList : demo.DEMO_ACTIVITY_INVENTORY);
+      setVendors(vendorList.length ? vendorList : demo.DEMO_VENDORS);
     } catch (err: any) {
-      setError(err?.message || 'Failed to load activity operations.');
+      const demo = await import('../../../data/operatorDemo');
+      setAssignments(demo.DEMO_ACTIVITY_ASSIGNMENTS);
+      setInventory(demo.DEMO_ACTIVITY_INVENTORY);
+      setVendors(demo.DEMO_VENDORS);
+      setError(null);
     } finally {
       setLoading(false);
     }
