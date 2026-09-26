@@ -17,9 +17,25 @@ interface Props {
 }
 
 export const OperatorDashboard: React.FC<Props> = ({ kpis, priorityAlerts, activeTours, allTrips, approvals, onSelectTrip, onTriggerDisruptionDemo, onAcceptTripRequest, onDeclineTripRequest, onOpenReplanForTrip, onOpenAssignmentCenter }) => {
-  const pendingRequests = allTrips.filter(t => t.status === 'planning');
+  // planning/draft = Pending Traveler Confirmation (Preview-only, never
+  // actionable); confirmed = Pending Operator Assignment (Accept & Assign);
+  // ongoing = Active tour. Backend operator_actionable is the source of
+  // truth; fall back to status so stale payloads fail closed.
+  const isActionable = (t: Trip) =>
+    typeof t.operator_actionable === 'boolean'
+      ? t.operator_actionable
+      : t.status === 'confirmed' || t.status === 'ongoing';
+  const actionableRequests = allTrips.filter(
+    (t) => t.status === 'confirmed' && isActionable(t),
+  );
+  const previewRequests = allTrips.filter(
+    (t) => (t.status === 'planning' || t.status === 'draft'),
+  );
+  const pendingRequests = previewRequests;
   const finalizedIds = new Set((approvals || []).filter(a => a.finalized).map(a => a.trip_id));
-  const incomingConfirmed = allTrips.filter(t => t.status === 'confirmed' && !finalizedIds.has(t.id));
+  // Legacy confirmed bucket (kept for the section below; the actionable
+  // Accept & Assign list above is the traveler-confirmed source of truth).
+  const incomingConfirmed = actionableRequests.filter(t => !finalizedIds.has(t.id));
   const kpiItems = [
     { label: 'Active Tours', value: kpis.active_tours, sub: 'across 4 sectors', icon: MapPin, tint: 'var(--color-accent)' },
     { label: 'Travelers', value: `${kpis.travelers_on_ground} Pax`, sub: 'verified partners', icon: Users, tint: 'var(--color-accent)' },
@@ -70,14 +86,14 @@ export const OperatorDashboard: React.FC<Props> = ({ kpis, priorityAlerts, activ
         </div>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16 }}>
-        {pendingRequests.length > 0 && (
+        {previewRequests.length > 0 && (
           <div style={{ borderRadius: 'var(--radius-lg)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
             <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--color-accent)', display: 'inline-block' }} /> Booking Requests - {pendingRequests.length}</span>
-              <span style={{ fontSize: 11, color: 'var(--color-accent)', fontWeight: 700 }}>Pending allotment</span>
+              <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--color-accent)', display: 'inline-block' }} /> Preview - Pending Traveler Confirmation ({previewRequests.length})</span>
+              <span style={{ fontSize: 11, color: 'var(--color-text-muted)', fontWeight: 600 }}>Read-only until the traveler confirms</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {pendingRequests.slice(0, 5).map(req => (
+              {previewRequests.slice(0, 5).map(req => (
                 <div key={req.id} style={{ padding: 14, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid var(--color-border-subtle)' }}>
                   <div style={{ minWidth: 240 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -85,32 +101,33 @@ export const OperatorDashboard: React.FC<Props> = ({ kpis, priorityAlerts, activ
                       <span style={{ fontWeight: 700, color: 'var(--color-text-primary)', fontSize: 13 }}>{req.title}</span>
                       <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 999, background: 'var(--color-surface-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-muted)' }}>{req.formatted_dates}</span>
                     </div>
-                    <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>{req.origin} to {req.destination?.name} - {req.traveler_count} pax - ₹{(req.total_budget || 0).toLocaleString()}</div>
+                    <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>{req.origin} to {req.destination?.name} - {req.traveler_count} pax - ₹{(req.total_budget || 0).toLocaleString()}{req.traveler?.name ? ` - ${req.traveler.name}` : ''}</div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <button id={`btn-accept-request-${req.id}`} onClick={() => onAcceptTripRequest(req.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 8, background: 'var(--color-accent)', color: 'var(--color-text-inverse)', fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer' }}><UserCheck size={14} /> Accept</button>
-                    <button id={`btn-review-request-${req.id}`} onClick={() => onSelectTrip(req.id)} style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--color-surface-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>Review</button>
-                    <button id={`btn-decline-request-${req.id}`} onClick={() => onDeclineTripRequest(req.id)} style={{ width: 32, height: 32, borderRadius: 8, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: '1px solid transparent', color: 'var(--color-text-muted)', cursor: 'pointer' }}><XCircle size={16} /></button>
+                    <button id={`btn-review-request-${req.id}`} onClick={() => onSelectTrip(req.id)} style={{ padding: '8px 10px', borderRadius: 8, background: 'var(--color-surface-elevated)', border: '1px solid var(--color-border)', color: 'var(--color-text-secondary)', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>Preview</button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
         )}
-        {incomingConfirmed.length > 0 && (
+        {actionableRequests.length > 0 && (
           <div style={{ borderRadius: 'var(--radius-lg)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
             <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--color-accent)', display: 'inline-block' }} /> Confirmed - {incomingConfirmed.length}</span>
-              <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', padding: '3px 8px', borderRadius: 999, background: 'var(--color-accent-soft)', border: '1px solid var(--color-accent-border)', color: 'var(--color-accent)' }}>Operator action required</span>
+              <span style={{ fontWeight: 800, fontSize: 12, letterSpacing: 'var(--tracking-wide)', textTransform: 'uppercase', color: 'var(--color-text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ width: 8, height: 8, borderRadius: 999, background: 'var(--color-accent)', display: 'inline-block' }} /> Actionable - Pending Operator Assignment ({actionableRequests.length})</span>
+              <span style={{ fontSize: 11, color: 'var(--color-accent)', fontWeight: 700 }}>Traveler-confirmed - Accept & Assign</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {incomingConfirmed.slice(0, 4).map(trip => (
-                <div key={trip.id} style={{ padding: 14, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid var(--color-border-subtle)' }}>
+              {actionableRequests.slice(0, 5).map(req => (
+                <div key={req.id} style={{ padding: 14, display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: 12, borderBottom: '1px solid var(--color-border-subtle)' }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-accent)', fontWeight: 700 }}>#{trip.id}</span><span style={{ fontWeight: 700, color: 'var(--color-text-primary)', fontSize: 13 }}>{trip.title}</span></div>
-                    <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>{trip.destination?.name} - {trip.start_date?.slice(0, 10)} to {trip.end_date?.slice(0, 10)} - {trip.traveler_count} pax</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}><span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--color-accent)', fontWeight: 700 }}>#{req.id}</span><span style={{ fontWeight: 700, color: 'var(--color-text-primary)', fontSize: 13 }}>{req.title}</span></div>
+                    <div style={{ fontSize: 12, color: 'var(--color-text-muted)', marginTop: 4 }}>{req.destination?.name} - {req.start_date?.slice(0, 10)} to {req.end_date?.slice(0, 10)} - {req.traveler_count} pax{req.traveler?.name ? ` - ${req.traveler.name}` : ''}</div>
                   </div>
-                  <button onClick={() => onOpenAssignmentCenter(trip.id)} style={{ padding: '8px 12px', borderRadius: 8, background: 'var(--color-surface-elevated)', color: '#fff', fontWeight: 600, fontSize: 12, border: '1px solid var(--color-border)', cursor: 'pointer' }}>Review →</button>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <button id={`btn-accept-request-${req.id}`} onClick={() => onAcceptTripRequest(req.id)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 8, background: 'var(--color-accent)', color: 'var(--color-text-inverse)', fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer' }}><UserCheck size={14} /> Accept & Assign</button>
+                    <button onClick={() => onOpenAssignmentCenter(req.id)} style={{ padding: '8px 12px', borderRadius: 8, background: 'var(--color-surface-elevated)', color: '#fff', fontWeight: 600, fontSize: 12, border: '1px solid var(--color-border)', cursor: 'pointer' }}>Review</button>
+                  </div>
                 </div>
               ))}
             </div>

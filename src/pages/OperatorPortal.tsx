@@ -14,13 +14,14 @@ import { OperatorBookings } from '../components/operator/bookings/OperatorBookin
 import { OperatorAlerts } from '../components/operator/alerts/OperatorAlerts';
 import { OperatorCommunications } from '../components/operator/communications/OperatorCommunications';
 import { TourFlowApi } from '../services/api';
+import { operatorSession } from '../services/operatorSession';
 import type { Trip, TripApprovalState } from '../types/tourflow';
 
 export const OperatorPortal: React.FC<{ onSwitchToTraveler: () => void }> = ({ onSwitchToTraveler }) => {
+  // Real gate: only a stored verified operator session unlocks the portal.
+  // (Legacy localStorage user objects without a JWT no longer grant access.)
   const [operatorUser, setOperatorUser] = useState<{ email: string; name: string; role: string; operator_name: string } | null>(() => {
-    const s = localStorage.getItem('tourflow_operator_user');
-    if (s) try { return JSON.parse(s); } catch { return null; }
-    return { email: 'operator@tourflow.ai', name: 'Rajesh Sharma', role: 'operator', operator_name: 'Himalayan Trails Tour Operations' };
+    return operatorSession.get()?.user ?? null;
   });
   const [currentTab, setCurrentTab] = useState<OperatorNavTab>('dashboard');
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
@@ -35,36 +36,67 @@ export const OperatorPortal: React.FC<{ onSwitchToTraveler: () => void }> = ({ o
   const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
   const [lastVersion, setLastVersion] = useState(0);
 
+  const handleLogout = useCallback(() => {
+    TourFlowApi.operatorLogout();
+    try { localStorage.removeItem('tourflow_operator_user'); } catch { /* ignore */ }
+    setOperatorUser(null);
+    setSelectedTripId(null);
+    setSelectedTrip(null);
+  }, []);
+
   const fetchAllData = useCallback(async () => {
     setIsSyncing(true);
+    TourFlowApi.lastOpsAuthStatus = 0;
     try {
-      const [dash, tripsList, bkgs, alrts] = await Promise.all([TourFlowApi.getOperatorDashboard(), TourFlowApi.getTrips(), TourFlowApi.getOperatorBookings(), TourFlowApi.getOperatorAlerts()]);
+      // Canonical traveler trips via the secure operator API (same Trip rows
+      // the Traveler app creates; the 3s sync-version poll below refetches
+      // whenever any trip's updated_at moves).
+      const [dash, tripsList, bkgs, alrts] = await Promise.all([TourFlowApi.getOperatorDashboard(), TourFlowApi.getOperatorTrips(), TourFlowApi.getOperatorBookings(), TourFlowApi.getOperatorAlerts()]);
       if (dash) setDashboardData(dash); if (tripsList) setAllTrips(tripsList); if (bkgs) setBookings(bkgs); if (alrts) setAlerts(alrts);
-      if (selectedTripId) { const t = await TourFlowApi.getTrip(selectedTripId); if (t) setSelectedTrip(t); }
+      if (selectedTripId) { const t = await TourFlowApi.getOperatorTrip(selectedTripId); if (t) setSelectedTrip(t); }
       setLastSyncTime(new Date());
-    } catch (e) { console.error(e); } finally { setIsSyncing(false); }
-  }, [selectedTripId]);
+    } catch (e) {
+      // Rejected operator session: end it so the login screen returns
+      // instead of retrying with a dead token.
+      if (TourFlowApi.lastOpsAuthStatus === 401) { handleLogout(); return; }
+      console.error(e);
+    } finally { setIsSyncing(false); }
+  }, [selectedTripId, handleLogout]);
 
   useEffect(() => { if (operatorUser) fetchAllData(); }, [operatorUser, fetchAllData]);
   useEffect(() => { if (!operatorUser) return; const id = setInterval(async () => { try { const m = await TourFlowApi.getSyncVersion(); if (m.version !== lastVersion) { setLastVersion(m.version); fetchAllData(); } } catch {} }, 3000); return () => clearInterval(id); }, [operatorUser, lastVersion, fetchAllData]);
   useEffect(() => { if (!operatorUser) return; let c = false; const load = async () => { try { const r = await TourFlowApi.getTripApprovals(); if (!c) setApprovals(r || []); } catch {} }; load(); const id = setInterval(load, 30000); return () => { c = true; clearInterval(id); }; }, [operatorUser]);
-  useEffect(() => { if (selectedTripId) TourFlowApi.getTrip(selectedTripId).then(t => t && setSelectedTrip(t)); else setSelectedTrip(null); }, [selectedTripId]);
+  useEffect(() => { if (selectedTripId) TourFlowApi.getOperatorTrip(selectedTripId).then(t => t && setSelectedTrip(t)).catch(e => { if (TourFlowApi.lastOpsAuthStatus === 401) handleLogout(); else console.error(e); }); else setSelectedTrip(null); }, [selectedTripId, handleLogout]);
 
-  if (!operatorUser) return <OperatorLogin onLoginSuccess={u => { localStorage.setItem('tourflow_operator_user', JSON.stringify(u)); setOperatorUser(u); }} onSwitchToTraveler={onSwitchToTraveler} />;
+  if (!operatorUser) return <OperatorLogin onLoginSuccess={(u) => { try { localStorage.setItem('tourflow_operator_user', JSON.stringify(u)); } catch { /* ignore */ } setOperatorUser(u); }} onSwitchToTraveler={onSwitchToTraveler} />;
 
   const unresolvedAlertCount = alerts.filter(a => !a.is_resolved).length;
   const isActiveTour = (t: Trip) => {
     if (t.id === 'trp-manali-alpine-demo-001') return false;
+    // Active = accepted/assigned tour under management. planning/draft
+    // (Pending Traveler Confirmation) is NEVER active; confirmed becomes
+    // active only via Accept & Assign (status flips confirmed -> ongoing).
     if (t.status === 'ongoing') return true;
-    if (t.status !== 'confirmed') return false;
-    const a = approvals.find(x => x.trip_id === t.id); return Boolean(a?.finalized);
+    if (t.status === 'confirmed') {
+      const a = approvals.find(x => x.trip_id === t.id);
+      return Boolean(a?.assignment_started);
+    }
+    return false;
   };
+  // Operator-actionable = traveler-confirmed (or already accepted). The
+  // backend is the source of truth (operator_actionable flag); fall back to
+  // status so stale payloads without the flag fail closed (Preview-only).
+  const isActionable = (t: Trip) => {
+    if (typeof t.operator_actionable === 'boolean') return t.operator_actionable;
+    return t.status === 'confirmed' || t.status === 'ongoing';
+  };
+  const isPreview = (t: Trip) => !isActionable(t) && t.status !== 'cancelled' && t.status !== 'completed';
   const activeToursCount = allTrips.filter(isActiveTour).length;
   const pendingRequestsCount = allTrips.filter(t => t.status === 'planning').length;
 
   return (
     <div className="app-layout-root" style={{ height: '100vh', overflow: 'hidden', background: 'radial-gradient(900px 500px at 20% -10%, rgba(255,255,255,0.035), transparent 60%), radial-gradient(700px 400px at 90% 0%, rgba(255,255,255,0.02), transparent 60%), var(--color-background)', display: 'flex', flexDirection: 'column' }}>
-      <OperatorHeader operatorUser={operatorUser} isSyncing={isSyncing} lastSyncTime={lastSyncTime} onManualSync={fetchAllData} onTriggerDisruptionDemo={async () => { try { const r = await TourFlowApi.triggerDisruption('1024'); if (r?.trip) { setSelectedTripId('1024'); setSelectedTrip(r.trip); fetchAllData(); } } catch {} }} onSwitchToTraveler={onSwitchToTraveler} onLogout={() => { localStorage.removeItem('tourflow_operator_user'); setOperatorUser(null); }} unresolvedAlertCount={unresolvedAlertCount} />
+      <OperatorHeader operatorUser={operatorUser} isSyncing={isSyncing} lastSyncTime={lastSyncTime} onManualSync={fetchAllData} onTriggerDisruptionDemo={async () => { try { const r = await TourFlowApi.triggerDisruption('1024'); if (r?.trip) { setSelectedTripId('1024'); setSelectedTrip(r.trip); fetchAllData(); } } catch {} }} onSwitchToTraveler={onSwitchToTraveler} onLogout={handleLogout} unresolvedAlertCount={unresolvedAlertCount} />
       <div className="app-layout" style={{ display: 'flex', height: 'calc(100vh - 56px)', overflow: 'hidden', minHeight: 0 }}>
         <OperatorSidebar currentTab={currentTab} onSelectTab={t => { setCurrentTab(t); setSelectedTripId(null); }} unresolvedAlertCount={unresolvedAlertCount} activeToursCount={activeToursCount} pendingRequestsCount={pendingRequestsCount} />
         <main className="main-content" style={{ flex: 1, height: '100%', overflowY: 'auto', minWidth: 0, padding: '20px 20px 32px', maxWidth: '100%' }}>
@@ -73,8 +105,8 @@ export const OperatorPortal: React.FC<{ onSwitchToTraveler: () => void }> = ({ o
               <OperatorTripWorkspace trip={selectedTrip} onBack={() => { setSelectedTripId(null); setSelectedTrip(null); }} onTripUpdated={u => { setSelectedTrip(u); fetchAllData(); }} onTriggerDisruptionDemo={async () => { try { const r = await TourFlowApi.triggerDisruption('1024'); if (r?.trip) { setSelectedTripId('1024'); setSelectedTrip(r.trip); fetchAllData(); } } catch {} }} operatorName={operatorUser.name} />
             ) : (
               <>
-                {currentTab === 'dashboard' && <OperatorDashboard kpis={dashboardData?.kpis || { active_tours: 4, travelers_on_ground: 22, today_activities: 14, urgent_issues: unresolvedAlertCount, upcoming_trips: pendingRequestsCount, total_revenue: 943400 }} priorityAlerts={dashboardData?.priority_alerts || []} activeTours={dashboardData?.active_tours_table || []} allTrips={allTrips} approvals={approvals} onSelectTrip={id => setSelectedTripId(id)} onTriggerDisruptionDemo={async () => { try { const r = await TourFlowApi.triggerDisruption('1024'); if (r?.trip) { setSelectedTripId('1024'); setSelectedTrip(r.trip); fetchAllData(); } } catch {} }} onAcceptTripRequest={async id => { await TourFlowApi.acceptTripRequest(id); fetchAllData(); }} onDeclineTripRequest={async id => { await TourFlowApi.declineTripRequest(id); fetchAllData(); }} onOpenReplanForTrip={id => setSelectedTripId(id)} onOpenAssignmentCenter={id => { setFocusOpsTripId(id); setCurrentTab('assignment_center'); }} />}
-                {currentTab === 'trip_requests' && <OperatorTripRequests trips={allTrips} onSelectTrip={id => setSelectedTripId(id)} onAcceptTripRequest={async id => { await TourFlowApi.acceptTripRequest(id); fetchAllData(); }} onDeclineTripRequest={async id => { await TourFlowApi.declineTripRequest(id); fetchAllData(); }} />}
+                {currentTab === 'dashboard' && <OperatorDashboard kpis={dashboardData?.kpis || { active_tours: 4, travelers_on_ground: 22, today_activities: 14, urgent_issues: unresolvedAlertCount, upcoming_trips: pendingRequestsCount, total_revenue: 943400 }} priorityAlerts={dashboardData?.priority_alerts || []} activeTours={dashboardData?.active_tours_table || []} allTrips={allTrips} approvals={approvals} onSelectTrip={id => setSelectedTripId(id)} onTriggerDisruptionDemo={async () => { try { const r = await TourFlowApi.triggerDisruption('1024'); if (r?.trip) { setSelectedTripId('1024'); setSelectedTrip(r.trip); fetchAllData(); } } catch {} }} onAcceptTripRequest={async id => { await TourFlowApi.approveTrip(id); await TourFlowApi.acceptTripAssignment(id); setApprovals((await TourFlowApi.getTripApprovals()) || []); fetchAllData(); }} onDeclineTripRequest={async id => { await TourFlowApi.declineTripRequest(id); fetchAllData(); }} onOpenReplanForTrip={id => setSelectedTripId(id)} onOpenAssignmentCenter={id => { setFocusOpsTripId(id); setCurrentTab('assignment_center'); }} />}
+                {currentTab === 'trip_requests' && <OperatorTripRequests trips={allTrips} onSelectTrip={id => setSelectedTripId(id)} onAcceptTripRequest={async id => { await TourFlowApi.approveTrip(id); await TourFlowApi.acceptTripAssignment(id); setApprovals((await TourFlowApi.getTripApprovals()) || []); fetchAllData(); }} onDeclineTripRequest={async id => { await TourFlowApi.declineTripRequest(id); fetchAllData(); }} />}
                 {currentTab === 'active_tours' && <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}><h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>Active Tours</h1><div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: 12 }}>{allTrips.filter(isActiveTour).map(t => (<div key={t.id} style={{ padding: 16, borderRadius: 'var(--radius-lg)', background: 'var(--color-surface)', border: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: 10 }}><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, fontWeight: 700, color: 'var(--color-accent)' }}>#{t.id}</span><span style={{ fontSize: 10, fontWeight: 800, textTransform: 'uppercase', padding: '2px 8px', borderRadius: 999, background: t.status === 'ongoing' ? 'var(--color-success-soft)' : 'var(--color-info-soft)', color: t.status === 'ongoing' ? 'var(--color-success)' : 'var(--color-info)', border: '1px solid ' + (t.status === 'ongoing' ? 'var(--color-success-border)' : 'var(--color-info-border)') }}>{t.status}</span></div><div style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{t.title}</div><div style={{ fontSize: 12, color: 'var(--color-text-muted)' }}>{t.origin} → {t.destination?.name} · {t.formatted_dates}</div><div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}><span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, color: 'var(--color-success)' }}>₹{(t.total_cost || t.total_budget || 0).toLocaleString()}</span><button id={`btn-manage-tour-${t.id}`} onClick={() => setSelectedTripId(t.id)} style={{ padding: '7px 12px', borderRadius: 8, background: 'var(--color-surface-elevated)', color: '#fff', fontWeight: 600, fontSize: 12, border: '1px solid var(--color-border)', cursor: 'pointer' }}>Open</button></div></div>))}</div></div>}
                 {currentTab === 'itineraries' && <OperatorItineraries trips={allTrips} onSelectTrip={id => setSelectedTripId(id)} onOpenReplanForTrip={id => setSelectedTripId(id)} />}
                 {currentTab === 'bookings' && <OperatorBookings bookings={bookings} onBookingAction={async (id, a) => { await TourFlowApi.updateBookingAction(id, a); fetchAllData(); }} onSelectTrip={id => setSelectedTripId(id)} />}

@@ -32,9 +32,34 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
   onDeclineTripRequest,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'planning' | 'confirmed' | 'cancelled'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'planning' | 'confirmed' | 'ongoing' | 'cancelled'>('all');
 
-  const pendingRequests = trips.filter((t) => t.status === 'planning');
+  // Lifecycle split (backend is the source of truth via operator_actionable):
+  // planning/draft = Pending Traveler Confirmation (Preview-only, NO actions);
+  // confirmed = Pending Operator Assignment (Accept & Assign enabled);
+  // ongoing = Active tour (manage). Fail closed when the flag is absent.
+  const isActionable = (t: Trip) =>
+    typeof t.operator_actionable === 'boolean'
+      ? t.operator_actionable
+      : t.status === 'confirmed' || t.status === 'ongoing';
+  const isPreview = (t: Trip) =>
+    !isActionable(t) && t.status !== 'cancelled' && t.status !== 'completed';
+  const lifecycleLabel = (t: Trip): string => {
+    if (typeof t.lifecycle === 'string' && t.lifecycle) {
+      if (t.lifecycle === 'pending_traveler_confirmation') return 'Pending Traveler Confirmation · Preview';
+      if (t.lifecycle === 'pending_operator_assignment') return 'Pending Operator Assignment';
+      if (t.lifecycle === 'active') return 'Active Tour';
+      return t.lifecycle;
+    }
+    if (t.status === 'planning' || t.status === 'draft') return 'Pending Traveler Confirmation · Preview';
+    if (t.status === 'confirmed') return 'Pending Operator Assignment';
+    if (t.status === 'ongoing') return 'Active Tour';
+    return t.status;
+  };
+
+  const pendingRequests = trips.filter((t) => t.status === 'planning' || t.status === 'draft');
+  const previewTrips = trips.filter(isPreview);
+  const actionableTrips = trips.filter(isActionable);
   const allRequests = trips.filter((t) => t.id !== 'trp-manali-alpine-demo-001');
 
   const filtered = allRequests.filter((t) => {
@@ -86,8 +111,9 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
         <div className="flex items-center space-x-2">
           {[
             { id: 'all', label: 'All' },
-            { id: 'planning', label: `Pending (${pendingRequests.length})` },
-            { id: 'confirmed', label: 'Accepted' },
+            { id: 'planning', label: 'Preview - Traveler Pending' },
+            { id: 'confirmed', label: 'Actionable - Pending Assignment' },
+            { id: 'ongoing', label: 'Active' },
             { id: 'cancelled', label: 'Declined' },
           ].map((tab) => (
             <button
@@ -115,7 +141,30 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
           </div>
         ) : (
           filtered.map((req) => {
-            const isPending = req.status === 'planning';
+            // Backend is the source of truth: operator_actionable is False for
+            // planning/draft Preview rows (Pending Traveler Confirmation) and
+            // True for confirmed/ongoing rows (Pending Assignment / Active).
+            // Fail closed when the flag is absent.
+            const actionable = typeof req.operator_actionable === 'boolean'
+              ? req.operator_actionable
+              : req.status === 'confirmed' || req.status === 'ongoing';
+            const isPreview = !actionable && req.status !== 'cancelled' && req.status !== 'completed';
+            const isPending = req.status === 'planning' || req.status === 'draft';
+            const lifecycleText = typeof req.lifecycle === 'string' && req.lifecycle
+              ? req.lifecycle === 'pending_traveler_confirmation'
+                ? 'Pending Traveler Confirmation - Preview'
+                : req.lifecycle === 'pending_operator_assignment'
+                  ? 'Pending Operator Assignment'
+                  : req.lifecycle === 'active'
+                    ? 'Active Tour'
+                    : req.lifecycle
+              : isPreview
+                ? 'Pending Traveler Confirmation - Preview'
+                : req.status === 'confirmed'
+                  ? 'Pending Operator Assignment'
+                  : req.status === 'ongoing'
+                    ? 'Active Tour'
+                    : req.status;
             return (
               <div
                 key={req.id}
@@ -134,14 +183,14 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                       <span className="text-xs font-mono font-bold text-neutral-200">#{req.id}</span>
                       <span
                         className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
-                          isPending
+                          isPreview
                             ? 'bg-amber-500/20 text-amber-300 border-amber-500/30 animate-pulse'
                             : req.status === 'confirmed'
                             ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
                             : 'bg-rose-500/20 text-rose-300 border-rose-500/30'
                         }`}
                       >
-                        {isPending ? 'Pending Operator Review' : req.status}
+                        {lifecycleText}
                       </span>
                       <span className="text-xs text-neutral-400 font-medium">
                         Submitted: {new Date(req.created_at || Date.now()).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -165,8 +214,23 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                         <Users className="w-3.5 h-3.5 text-neutral-500" />
                         <span>Group: <strong className="text-neutral-200">{req.traveler_count} Pax ({req.travel_type})</strong></span>
                       </span>
+                      {req.traveler?.name && (
+                        <>
+                          <span>•</span>
+                          <span className="flex items-center space-x-1">
+                            <span>Traveler: <strong className="text-neutral-200">{req.traveler.name}</strong></span>
+                          </span>
+                        </>
+                      )}
                     </div>
 
+                    {/* Preview notice: unconfirmed trips are read-only. */}
+                    {isPreview && (
+                      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2.5 text-xs text-amber-300/90 flex items-start space-x-2">
+                        <Clock className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-400" />
+                        <span><strong>Pending traveler confirmation - Preview only.</strong> Accept, assign, dispatch, and modify actions unlock after the traveler confirms this trip.</span>
+                      </div>
+                    )}
                     {req.preferences?.special_requests && (
                       <div className="bg-neutral-950/60 border border-neutral-800 rounded-xl p-2.5 text-xs text-amber-300/90 flex items-start space-x-2">
                         <MessageSquare className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-amber-400" />
@@ -185,7 +249,24 @@ export const OperatorTripRequests: React.FC<OperatorTripRequestsProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-2 w-full sm:w-auto">
-                      {isPending ? (
+                      {isPreview ? (
+                        <>
+                          <span
+                            title="Accept & Assign unlocks after traveler confirmation"
+                            className="flex-1 sm:flex-none px-3.5 py-2 bg-neutral-800 text-neutral-500 text-xs font-semibold rounded-xl border border-neutral-800 flex items-center justify-center space-x-1.5 cursor-not-allowed opacity-60"
+                          >
+                            <UserCheck className="w-3.5 h-3.5" />
+                            <span>Accept & Assign (locked)</span>
+                          </span>
+                          <button
+                            id={`btn-review-request-${req.id}`}
+                            onClick={() => onSelectTrip(req.id)}
+                            className="px-3 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-medium rounded-xl border border-neutral-700 transition-colors"
+                          >
+                            Preview
+                          </button>
+                        </>
+                      ) : isPending ? (
                         <>
                           <button
                             id={`btn-accept-request-${req.id}`}

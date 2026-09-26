@@ -36,6 +36,7 @@ import {
   CreatedTripResult,
 } from '../types/tourflow';
 import { travelerSession } from './travelerSession';
+import { operatorSession } from './operatorSession';
 
 const RAW_API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
 // Frontend-first fix: never build a relative "undefined/..." URL (Vite would
@@ -72,6 +73,16 @@ export const TourFlowApi = {
   /** Authorization header for the logged-in traveler, if any. */
   authHeaders(): Record<string, string> {
     const token = travelerSession.getToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  },
+
+  /** Last HTTP status seen on an operator API check (lets the portal
+   * distinguish an explicit 401 rejection from a network failure). */
+  lastOpsAuthStatus: 0 as number,
+
+  /** Authorization header for the logged-in operator, if any. */
+  operatorHeaders(): Record<string, string> {
+    const token = operatorSession.getToken();
     return token ? { Authorization: `Bearer ${token}` } : {};
   },
 
@@ -445,22 +456,20 @@ export const TourFlowApi = {
     return await parseJsonSafe(res);
   },
 
-  async acceptTripRequest(tripId: string): Promise<any> {
-    const res = await fetch(`${API_BASE}/trips/${tripId}/accept-request`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({ detail: 'Failed to accept trip request' }));
-      throw new Error(err.detail || 'Failed to accept trip request');
-    }
-    return await parseJsonSafe(res);
+  /** @deprecated Operator Accept & Assign runs through the secure operator
+   * pipeline (approveTrip + acceptTripAssignment with the operator JWT).
+   * Legacy /trips/{id}/accept-request flips traveler status without auth
+   * and is never used by the portal. */
+  async acceptTripRequest(_tripId: string): Promise<never> {
+    throw new Error('acceptTripRequest is retired: use approveTrip + acceptTripAssignment (traveler-confirmed trips only)');
   },
 
   async declineTripRequest(tripId: string): Promise<any> {
+    // Decline stays on the legacy traveler-request route (no Trip row may
+    // exist yet); operator pipeline trips are cancelled via status flows.
     const res = await fetch(`${API_BASE}/trips/${tripId}/decline-request`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...this.operatorHeaders() },
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Failed to decline trip request' }));
@@ -605,7 +614,7 @@ export const TourFlowApi = {
     }
   },
 
-  async operatorLogin(email: string, password: string): Promise<{ success: boolean; user: any; detail?: string }> {
+  async operatorLogin(email: string, password: string): Promise<{ success: boolean; user: any; token?: string; detail?: string }> {
     const res = await fetch(`${API_BASE}/auth/operator-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -615,7 +624,17 @@ export const TourFlowApi = {
       const err = await res.json().catch(() => ({ detail: 'Authentication failed' }));
       throw new Error(err.detail || 'Invalid operator credentials');
     }
-    return await parseJsonSafe(res);
+    const body = await parseJsonSafe<{ success: boolean; user: any; token?: string }>(res);
+    // Persist the verified operator JWT (never the password) so trip and
+    // operations calls can prove operator authorization to the backend.
+    if (body?.success && body?.user && body?.token) {
+      operatorSession.set({ token: body.token, user: body.user });
+    }
+    return body;
+  },
+
+  operatorLogout(): void {
+    operatorSession.clear();
   },
 
   async operatorAiAssistant(message: string, contextTripId?: string): Promise<{ reply: string; timestamp: string; suggested_actions: string[] }> {
@@ -903,14 +922,36 @@ export const TourFlowApi = {
   async _ops<T>(method: string, path: string, body?: unknown): Promise<T> {
     const res = await fetch(`${API_BASE}${path}`, {
       method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...this.operatorHeaders() },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
+    this.lastOpsAuthStatus = res.status;
+    if (res.status === 401) {
+      // Operator session rejected: drop it so the portal returns to login
+      // instead of retrying with a dead token.
+      operatorSession.clear();
+      const err = await res.json().catch(() => ({ detail: 'Operator session expired. Please sign in again.' }));
+      throw new Error(err.detail || 'Operator session expired. Please sign in again.');
+    }
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: `Operations request failed (${res.status})` }));
       throw new Error(err.detail || `Operations request failed (${res.status})`);
     }
     return await parseJsonSafe<T>(res);
+  },
+
+  // Canonical traveler trips for operators (secure backend /ops/trips —
+  // same Trip rows the Traveler app creates; requires operator session).
+  async getOperatorTrips(filters?: { status?: string; search?: string }): Promise<Trip[]> {
+    const params = new URLSearchParams();
+    if (filters?.status) params.set('status', filters.status);
+    if (filters?.search) params.set('search', filters.search);
+    const suffix = params.toString() ? `?${params.toString()}` : '';
+    return this._ops('GET', `/ops/trips${suffix}`);
+  },
+
+  async getOperatorTrip(tripId: string): Promise<Trip> {
+    return this._ops('GET', `/ops/trips/${encodeURIComponent(tripId)}`);
   },
 
   // Accommodation operations

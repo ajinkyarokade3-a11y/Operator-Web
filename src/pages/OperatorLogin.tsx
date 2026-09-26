@@ -3,12 +3,12 @@ import { Shield, KeyRound, Mail, ArrowRight, CheckCircle2, Compass, AlertCircle 
 import { TourFlowApi } from '../services/api';
 
 interface OperatorLoginProps {
-  onLoginSuccess: (user: { email: string; name: string; role: string; operator_name: string }) => void;
+  onLoginSuccess: (user: { email: string; name: string; role: string; operator_name: string }, token?: string) => void;
   onSwitchToTraveler: () => void;
 }
 
 export const OperatorLogin: React.FC<OperatorLoginProps> = ({ onLoginSuccess, onSwitchToTraveler }) => {
-  const [email, setEmail] = useState('operator@tourflow.ai');
+  const [email, setEmail] = useState('rahul.operator@tourflow.ai');
   const [password, setPassword] = useState('demo123');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -20,25 +20,25 @@ export const OperatorLogin: React.FC<OperatorLoginProps> = ({ onLoginSuccess, on
 
     try {
       const res = await TourFlowApi.operatorLogin(email.trim(), password);
-      if (res?.success && res?.user) {
+      if (res?.success && res?.user && res?.token) {
         onLoginSuccess({
           email: res.user.email,
           name: res.user.name || 'Rajesh Sharma',
           role: res.user.role || 'operator',
           operator_name: res.user.operator_name || 'Himalayan Trails Tour Operations',
-        });
+        }, res.token);
       } else {
-        setError(res?.detail || 'Invalid operator credentials. Use operator@tourflow.ai / demo123');
+        setError(res?.detail || 'Invalid operator credentials. Use rahul.operator@tourflow.ai / demo123');
       }
     } catch (err: any) {
-      setError(err?.message || 'Authentication error. Use operator@tourflow.ai / demo123');
+      setError(err?.message || 'Authentication error. Use rahul.operator@tourflow.ai / demo123');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleFillDemo = () => {
-    setEmail('operator@tourflow.ai');
+    setEmail('rahul.operator@tourflow.ai');
     setPassword('demo123');
     setError(null);
   };
@@ -105,7 +105,7 @@ export const OperatorLogin: React.FC<OperatorLoginProps> = ({ onLoginSuccess, on
               </button>
             </div>
             <div className="font-mono text-neutral-400 text-[11px] space-y-0.5">
-              <div>Email: <span className="text-neutral-200 font-bold text-neutral-200">operator@tourflow.ai</span></div>
+              <div>Email: <span className="text-neutral-200 font-bold text-neutral-200">rahul.operator@tourflow.ai</span></div>
               <div>Password: <span className="text-neutral-200">demo123</span></div>
               <div>Role: <span className="text-emerald-400 font-semibold">operator</span></div>
             </div>
@@ -129,7 +129,7 @@ export const OperatorLogin: React.FC<OperatorLoginProps> = ({ onLoginSuccess, on
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="operator@tourflow.ai"
+                  placeholder="rahul.operator@tourflow.ai"
                   className="w-full bg-neutral-950 border border-neutral-800 rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:outline-none focus:border-neutral-400 focus:ring-1 focus:ring-neutral-400 transition-colors"
                 />
               </div>

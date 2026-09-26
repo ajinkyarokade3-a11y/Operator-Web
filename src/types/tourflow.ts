@@ -584,12 +584,25 @@ export interface OpsActivityInventoryItem {
   is_active: boolean;
 }
 
+export interface OperatorTripTraveler {
+  id: string;
+  /** Traveler display name (operator views never receive email/phone). */
+  name: string | null;
+}
+
 export interface Trip {
   id: string;
   user_id: string;
+  /** Operator-only traveler identity (present on secure /ops/trips payloads). */
+  traveler?: OperatorTripTraveler;
   destination_id?: string;
   title: string;
   status: 'draft' | 'planning' | 'confirmed' | 'ongoing' | 'completed' | 'cancelled';
+  /** Operator lifecycle gate derived by the backend from the Trip row: pending_traveler_confirmation (Preview-only) | pending_operator_assignment (actionable) | active | completed | cancelled. Absent on stale payloads - treat missing as non-actionable. */
+  lifecycle?: string;
+  /** True only for traveler-confirmed/active trips. False for planning/draft Preview rows: Accept/Assign/Dispatch must stay hidden or disabled. */
+  operator_actionable?: boolean;
+  approval?: { approved?: boolean; assignment_started?: boolean; finalized?: boolean };
   origin?: string | null;
   start_date?: string | null;
   end_date?: string | null;
