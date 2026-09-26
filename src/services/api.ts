@@ -34,6 +34,9 @@ import {
   TravelerAuthResponse,
   TravelerTripSummary,
   CreatedTripResult,
+  TravelerOperatorChat,
+  TravelerOperatorChatMessage,
+  TravelerChatOverviewEntry,
 } from '../types/tourflow';
 import { travelerSession } from './travelerSession';
 import { operatorSession } from './operatorSession';
@@ -1137,6 +1140,28 @@ export const TourFlowApi = {
     return this._ops('POST', `/ops/trips/${encodeURIComponent(tripId)}/messages`, {
       trip_id: tripId,
       ...payload,
+    });
+  },
+
+  // Traveler <-> operator chat (bidirectional, traveler-visible).
+  // Separate domain from internal TripMessage notes: different table and
+  // different endpoints. The backend decides `enabled`/`status` from the
+  // canonical traveler-confirmed -> approved -> accepted pipeline; the
+  // frontend only renders what the backend reports.
+  getTripChat(tripId: string): Promise<TravelerOperatorChat> {
+    return this._ops('GET', `/ops/trips/${encodeURIComponent(tripId)}/chat`);
+  },
+  getTripChatOverview(): Promise<TravelerChatOverviewEntry[]> {
+    return this._ops('GET', '/ops/chats/overview');
+  },
+  initializeTripChat(tripId: string): Promise<TravelerOperatorChat> {
+    return this._ops('POST', `/ops/trips/${encodeURIComponent(tripId)}/chat`, {});
+  },
+  sendTripChatMessage(tripId: string, body: string): Promise<TravelerOperatorChatMessage> {
+    // Only the plain-text body is sent. sender_type/sender_id are derived
+    // server-side from the operator JWT — never trust client-supplied IDs.
+    return this._ops('POST', `/ops/trips/${encodeURIComponent(tripId)}/chat/messages`, {
+      body,
     });
   },
 

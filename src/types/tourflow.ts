@@ -735,3 +735,58 @@ export interface CreatedTripResult extends Trip {
    * (false when logged in but the save failed; undefined when anonymous). */
   persistedToAccount?: boolean;
 }
+
+/* ------------------------------------------------------------------ */
+/* Traveler ↔ Operator chat (bidirectional, traveler-visible).         */
+/*                                                                     */
+/* Separate domain from TripMessage internal operator notes. Never mix  */
+/* the two: TripMessage stays operator-only/traveler-invisible, while   */
+/* these rows are visible to both the traveler and the operator.        */
+/* Backend (`GET /ops/trips/{id}/chat`) is authoritative for            */
+/* eligibility (`enabled`/`status`); the frontend never duplicates the  */
+/* approval state machine.                                             */
+/* ------------------------------------------------------------------ */
+
+export type TravelerChatSenderType = 'traveler' | 'operator';
+
+export type TravelerChatStatus =
+  | 'waiting_for_traveler_confirmation'
+  | 'waiting_for_operator_acceptance'
+  | 'active'
+  | 'closed';
+
+export interface ChatParticipant {
+  id: string;
+  name: string | null;
+}
+
+export interface TravelerOperatorChatMessage {
+  id: string;
+  trip_id: string;
+  sender_type: TravelerChatSenderType;
+  sender_id: string;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface TravelerOperatorChat {
+  trip_id: string;
+  enabled: boolean;
+  status: TravelerChatStatus;
+  /** Machine-readable reason when enabled === false (humanised by UI). */
+  reason?: string | null;
+  traveler: ChatParticipant;
+  operator: ChatParticipant;
+  /** Chronological (oldest first). */
+  messages: TravelerOperatorChatMessage[];
+  unread_count: number;
+  latest_message_at?: string | null;
+}
+
+export interface TravelerChatOverviewEntry {
+  trip_id: string;
+  message_count: number;
+  unread_count: number;
+  latest_at?: string | null;
+}
