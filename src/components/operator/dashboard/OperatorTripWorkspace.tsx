@@ -49,52 +49,58 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
   const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'bookings' | 'vendors' | 'history' | 'preview' | 'communications' | 'traveler_chat'>('itinerary');
   const [isAnalyzingImpact, setIsAnalyzingImpact] = useState(false);
   const [impactAnalysis, setImpactAnalysis] = useState<any | null>(null);
-  const [replanOptions, setReplanOptions] = useState<any[]>([]);
-  const [isLoadingReplan, setIsLoadingReplan] = useState(false);
-  const [selectedAlternativeId, setSelectedAlternativeId] = useState<string>('alt-kayak-001');
+  const [analysisError, setAnalysisError] = useState<string | null>(null);
+  const [selectedAlternativeId, setSelectedAlternativeId] = useState<string>('');
   const [operatorNotes, setOperatorNotes] = useState<string>('Approved alternative based on traveler adventure preferences and verified immediate vendor capacity.');
   const [isApplyingReplan, setIsApplyingReplan] = useState(false);
+  const [isDismissing, setIsDismissing] = useState(false);
   const [replanSuccessSummary, setReplanSuccessSummary] = useState<any | null>(null);
 
   // Check if trip has active unresolved disruption
   const activeCriticalAlert = trip.alerts?.find((a) => !a.is_resolved && (a.severity === 'critical' || a.severity === 'warning'));
   const hasGroundedItem = trip.itinerary?.some((i) => i.status === 'skipped' || i.title?.toLowerCase().includes('paragliding') && trip.alerts?.some(a => !a.is_resolved));
 
-  // Run impact analysis when disruption is detected
+  // Run AI disruption impact analysis (does NOT modify the itinerary)
   const handleRunImpactAnalysis = async () => {
     setIsAnalyzingImpact(true);
+    setAnalysisError(null);
     try {
-      const res = await TourFlowApi.getImpactAnalysis(trip.id, {
-        title: activeCriticalAlert?.title || 'Severe Alpine Wind Shear at Solang Valley',
-        description: activeCriticalAlert?.description || '48 km/h wind shear grounding paragliding flights',
-      });
+      const payload = activeCriticalAlert
+        ? { alert_id: activeCriticalAlert.id }
+        : {
+            disruption: {
+              type: 'weather',
+              severity: 'warning',
+              title: 'Severe Alpine Wind Shear at Solang Valley',
+              description: '48 km/h wind shear grounding paragliding flights',
+            },
+          };
+      const res = await TourFlowApi.runDisruptionAnalysis(trip.id, payload);
       setImpactAnalysis(res);
-      await handleFetchReplanOptions();
+      if (res?.alternatives?.length > 0) {
+        setSelectedAlternativeId(res.alternatives[0].activity_id);
+      }
     } catch (err) {
-      console.error(err);
+      setAnalysisError(err instanceof Error ? err.message : 'Failed to run disruption analysis');
     } finally {
       setIsAnalyzingImpact(false);
     }
   };
 
-  // Fetch AI Replan options from Gemini
-  const handleFetchReplanOptions = async () => {
-    setIsLoadingReplan(true);
+  // Dismiss the disruption without changing the itinerary
+  const handleDismissDisruption = async () => {
+    setIsDismissing(true);
+    setAnalysisError(null);
     try {
-      const res = await TourFlowApi.getAiReplanOptions(trip.id, {
-        title: activeCriticalAlert?.title || 'Alpine Wind Shear Warning at Solang Valley',
-        description: activeCriticalAlert?.description || 'Paragliding grounded due to high wind speeds',
-      });
-      if (res?.candidates) {
-        setReplanOptions(res.candidates);
-        if (res.candidates.length > 0) {
-          setSelectedAlternativeId(res.candidates[0].id);
-        }
-      }
+      await TourFlowApi.dismissDisruption(trip.id, operatorNotes || 'Operator dismissed the disruption without itinerary changes.');
+      // Re-fetch the trip so alert states update; the itinerary itself is unchanged.
+      const updatedTrip = await TourFlowApi.getOperatorTrip(trip.id);
+      if (updatedTrip) onTripUpdated(updatedTrip);
+      setImpactAnalysis(null);
     } catch (err) {
-      console.error(err);
+      setAnalysisError(err instanceof Error ? err.message : 'Failed to dismiss disruption');
     } finally {
-      setIsLoadingReplan(false);
+      setIsDismissing(false);
     }
   };
 
@@ -102,14 +108,16 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
   const handleApproveReplan = async () => {
     if (!selectedAlternativeId) return;
     setIsApplyingReplan(true);
+    setAnalysisError(null);
     try {
       const res = await TourFlowApi.applyReplan(trip.id, selectedAlternativeId, operatorNotes);
       if (res?.success && res?.trip) {
         onTripUpdated(res.trip);
         setReplanSuccessSummary(res.summary);
+        setImpactAnalysis(null);
       }
     } catch (err) {
-      console.error('Failed to apply replan', err);
+      setAnalysisError(err instanceof Error ? err.message : 'Failed to apply replan');
     } finally {
       setIsApplyingReplan(false);
     }
@@ -305,6 +313,16 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
             </div>
           )}
 
+          {/* Analysis Error Banner */}
+          {analysisError && !replanSuccessSummary && (
+            <div className="bg-rose-950/40 border border-rose-500/50 rounded-2xl p-4 shadow-md">
+              <div className="flex items-center space-x-2 text-rose-300">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                <span className="text-sm font-semibold">{analysisError}</span>
+              </div>
+            </div>
+          )}
+
           {/* Impact Analysis Details Card */}
           {impactAnalysis && !replanSuccessSummary && (
             <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-md space-y-4">
@@ -316,114 +334,260 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
                   </h3>
                 </div>
                 <span className="text-xs text-neutral-400 font-mono">
-                  Calculated at {new Date().toLocaleTimeString()}
+                  {impactAnalysis.source || 'ai'} • {new Date().toLocaleTimeString()}
                 </span>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
-                  <div className="text-[10px] text-neutral-400 uppercase">Affected Travelers</div>
-                  <div className="text-lg font-bold text-white mt-0.5">{impactAnalysis.affected_travelers} Pax</div>
+              {/* Disruption cause & severity */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
+                    impactAnalysis.severity === 'critical'
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                      : 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                  }`}>
+                    {impactAnalysis.severity || 'warning'}
+                  </span>
+                  {impactAnalysis.status && (
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-neutral-500/20 text-neutral-300 border border-neutral-500/30">
+                      {String(impactAnalysis.status).replace(/_/g, ' ')}
+                    </span>
+                  )}
                 </div>
-                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
-                  <div className="text-[10px] text-neutral-400 uppercase">Unfulfilled Value</div>
-                  <div className="text-lg font-bold text-rose-400 mt-0.5">₹{impactAnalysis.financial_exposure.unfulfilled_booking_cost.toLocaleString()}</div>
-                </div>
-                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
-                  <div className="text-[10px] text-neutral-400 uppercase">Time Window Affected</div>
-                  <div className="text-xs font-bold text-neutral-200 mt-1">{impactAnalysis.time_window_affected.start_time} – {impactAnalysis.time_window_affected.end_time}</div>
-                </div>
-                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
-                  <div className="text-[10px] text-neutral-400 uppercase">Safety Risk Level</div>
-                  <div className="text-xs font-bold text-rose-400 mt-1 uppercase">{impactAnalysis.safety_risk_level} (High Winds)</div>
+                <h4 className="text-base font-bold text-white">{impactAnalysis.disruption_cause || 'Unknown disruption'}</h4>
+                {impactAnalysis.impact_summary && (
+                  <p className="text-xs text-neutral-400">{impactAnalysis.impact_summary}</p>
+                )}
+                <div className="flex flex-wrap gap-4 text-xs text-neutral-400">
+                  {impactAnalysis.affected_day != null && (
+                    <span>Affected Day: <strong className="text-neutral-200">Day {impactAnalysis.affected_day}</strong></span>
+                  )}
+                  {impactAnalysis.affected_activity && (
+                    <span>Activity: <strong className="text-neutral-200">{impactAnalysis.affected_activity}</strong></span>
+                  )}
                 </div>
               </div>
 
-              {/* Gemini AI Ranked Alternatives */}
-              <div className="pt-2 space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider flex items-center space-x-1.5">
-                    <span>Ranked AI Replanning Candidates (Gemini Engine)</span>
-                  </h4>
-                  <span className="text-[11px] text-emerald-400 font-medium">All vendors capacity-verified</span>
+              {/* Impact metrics */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
+                  <div className="text-[10px] text-neutral-400 uppercase">Affected Items</div>
+                  <div className="text-lg font-bold text-white mt-0.5">{impactAnalysis.affected_items?.length || 0}</div>
                 </div>
+                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
+                  <div className="text-[10px] text-neutral-400 uppercase">Affected Bookings</div>
+                  <div className="text-lg font-bold text-white mt-0.5">{impactAnalysis.affected_bookings?.length || 0}</div>
+                </div>
+                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
+                  <div className="text-[10px] text-neutral-400 uppercase">Affected Vendors</div>
+                  <div className="text-lg font-bold text-white mt-0.5">{impactAnalysis.affected_vendors?.length || 0}</div>
+                </div>
+                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800">
+                  <div className="text-[10px] text-neutral-400 uppercase">Est. Cost Impact</div>
+                  <div className="text-lg font-bold text-rose-400 mt-0.5">
+                    {impactAnalysis.estimated_cost_impact != null ? `₹${Number(impactAnalysis.estimated_cost_impact).toLocaleString()}` : '—'}
+                  </div>
+                </div>
+              </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {replanOptions.map((alt) => {
-                    const isSelected = selectedAlternativeId === alt.id;
-                    return (
-                      <div
-                        key={alt.id}
-                        onClick={() => setSelectedAlternativeId(alt.id)}
-                        className={`cursor-pointer rounded-xl p-4 border transition-all flex flex-col justify-between ${
-                          isSelected
-                            ? 'bg-neutral-800/90 border-emerald-500 shadow-lg shadow-black/40 ring-1 ring-emerald-500'
-                            : 'bg-neutral-950/80 border-neutral-800 hover:border-neutral-700'
-                        }`}
-                      >
-                        <div className="space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                              {alt.match_score}% Match
-                            </span>
-                            <span className="text-xs font-mono font-bold text-white">
-                              ₹{alt.total_price.toLocaleString()}
-                            </span>
-                          </div>
-
-                          <h5 className="font-bold text-white text-sm">{alt.title}</h5>
-                          <p className="text-xs text-neutral-400 line-clamp-3">{alt.description}</p>
-
-                          <div className="text-[11px] text-neutral-400 space-y-1 pt-1 border-t border-neutral-800/80">
-                            <div>Vendor: <strong className="text-neutral-300">{alt.vendor_name}</strong></div>
-                            <div>Window: <strong className="text-neutral-300">{alt.start_time} – {alt.end_time}</strong></div>
-                            <div>Location: <strong className="text-neutral-300">{alt.location}</strong></div>
-                          </div>
+              {/* Affected itinerary items */}
+              {impactAnalysis.affected_items?.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider">Affected Itinerary Items</h4>
+                  <div className="space-y-1.5">
+                    {impactAnalysis.affected_items.map((item: any) => (
+                      <div key={item.id} className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 flex items-center justify-between text-xs">
+                        <div>
+                          <span className="text-neutral-400 font-mono">Day {item.day_number}</span>
+                          <span className="ml-2 font-bold text-white">{item.title}</span>
+                          {item.location && <span className="ml-2 text-neutral-400">• {item.location}</span>}
                         </div>
+                        <span className="text-neutral-400 capitalize">{item.status}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
-                        <div className="mt-4 pt-2 flex items-center justify-between text-xs">
-                          <span className="text-emerald-400 text-[11px]">Instant Allotment</span>
-                          <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${
-                            isSelected ? 'bg-white border-white text-black' : 'border-neutral-700 text-transparent'
-                          }`}>
-                            <Check className="w-3 h-3" />
-                          </span>
+              {/* Affected bookings */}
+              {impactAnalysis.affected_bookings?.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider">Affected Bookings</h4>
+                  <div className="space-y-1.5">
+                    {impactAnalysis.affected_bookings.map((b: any, i: number) => (
+                      <div key={b.id || i} className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 flex items-center justify-between text-xs">
+                        <div>
+                          <span className="font-bold text-white">{b.vendor_name || b.booking_reference || 'Booking'}</span>
+                          {b.impact && <span className="ml-2 text-neutral-400">• {b.impact}</span>}
+                        </div>
+                        {b.amount != null && <span className="font-mono text-rose-400">₹{Number(b.amount).toLocaleString()}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Affected vendors */}
+              {impactAnalysis.affected_vendors?.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider">Affected Vendors</h4>
+                  <div className="space-y-1.5">
+                    {impactAnalysis.affected_vendors.map((v: any, i: number) => (
+                      <div key={v.id || i} className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 flex items-center justify-between text-xs">
+                        <div>
+                          <span className="font-bold text-white">{v.name || v.vendor_name || 'Vendor'}</span>
+                          {v.vendor_type && <span className="ml-2 text-neutral-400 uppercase text-[10px]">• {v.vendor_type}</span>}
+                          {v.impact && <span className="ml-2 text-neutral-400">• {v.impact}</span>}
                         </div>
                       </div>
-                    );
-                  })}
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Transport changes */}
+              {impactAnalysis.transport_changes?.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider">Transport Changes</h4>
+                  <div className="space-y-1.5">
+                    {impactAnalysis.transport_changes.map((tc: any, i: number) => (
+                      <div key={i} className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-xs text-neutral-300">
+                        {tc.description}
+                        {tc.required && <span className="ml-2 text-rose-400 font-bold">Required</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Schedule impact */}
+              {impactAnalysis.estimated_schedule_impact && (
+                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-xs">
+                  <span className="text-neutral-400 uppercase text-[10px] font-bold">Schedule Impact</span>
+                  <p className="text-neutral-200 mt-1">{impactAnalysis.estimated_schedule_impact}</p>
+                </div>
+              )}
+
+              {/* Risks & limitations */}
+              {impactAnalysis.risks_limitations?.length > 0 && (
+                <div className="bg-neutral-950 p-3 rounded-xl border border-neutral-800 text-xs">
+                  <span className="text-neutral-400 uppercase text-[10px] font-bold">Risks & Limitations</span>
+                  <ul className="list-disc list-inside text-neutral-300 mt-1 space-y-0.5">
+                    {impactAnalysis.risks_limitations.map((r: string, i: number) => (
+                      <li key={i}>{r}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Gemini AI Ranked Alternatives */}
+              {impactAnalysis.alternatives?.length > 0 && (
+                <div className="pt-2 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-neutral-200 uppercase tracking-wider flex items-center space-x-1.5">
+                      <span>Ranked AI Replanning Candidates (Gemini Engine)</span>
+                    </h4>
+                    <span className="text-[11px] text-emerald-400 font-medium">All vendors capacity-verified</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {impactAnalysis.alternatives.map((alt: any) => {
+                      const isSelected = selectedAlternativeId === alt.activity_id;
+                      return (
+                        <div
+                          key={alt.activity_id}
+                          onClick={() => setSelectedAlternativeId(alt.activity_id)}
+                          className={`cursor-pointer rounded-xl p-4 border transition-all flex flex-col justify-between ${
+                            isSelected
+                              ? 'bg-neutral-800/90 border-emerald-500 shadow-lg shadow-black/40 ring-1 ring-emerald-500'
+                              : 'bg-neutral-950/80 border-neutral-800 hover:border-neutral-700'
+                          }`}
+                        >
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                AI Suggested
+                              </span>
+                              <span className="text-xs font-mono font-bold text-white">
+                                ₹{Number(alt.cost || 0).toLocaleString()} {alt.currency || 'INR'}
+                              </span>
+                            </div>
+
+                            <h5 className="font-bold text-white text-sm">{alt.title}</h5>
+                            <p className="text-xs text-neutral-400 line-clamp-3">{alt.rationale}</p>
+
+                            <div className="text-[11px] text-neutral-400 space-y-1 pt-1 border-t border-neutral-800/80">
+                              {alt.location && <div>Location: <strong className="text-neutral-300">{alt.location}</strong></div>}
+                              {alt.duration_hours != null && <div>Duration: <strong className="text-neutral-300">{alt.duration_hours}h</strong></div>}
+                              {alt.estimated_time_impact && <div>Time impact: <strong className="text-neutral-300">{alt.estimated_time_impact}</strong></div>}
+                            </div>
+
+                            {alt.risks?.length > 0 && (
+                              <div className="text-[11px] text-rose-300/80 space-y-0.5">
+                                {alt.risks.map((r: string, i: number) => (
+                                  <div key={i}>• {r}</div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="mt-4 pt-2 flex items-center justify-between text-xs">
+                            <span className="text-emerald-400 text-[11px]">Pending Approval</span>
+                            <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${
+                              isSelected ? 'bg-white border-white text-black' : 'border-neutral-700 text-transparent'
+                            }`}>
+                              <Check className="w-3 h-3" />
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Operator Approval Note & Execution Form */}
+              <div className="mt-4 p-4 bg-neutral-950 border border-neutral-800 rounded-xl space-y-3">
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-300 mb-1">
+                    Operator Replan Justification & Dispatch Notes
+                  </label>
+                  <input
+                    type="text"
+                    value={operatorNotes}
+                    onChange={(e) => setOperatorNotes(e.target.value)}
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neutral-400"
+                    placeholder="Enter operator approval notes..."
+                  />
                 </div>
 
-                {/* Operator Approval Note & Execution Form */}
-                <div className="mt-4 p-4 bg-neutral-950 border border-neutral-800 rounded-xl space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-neutral-300 mb-1">
-                      Operator Replan Justification & Dispatch Notes
-                    </label>
-                    <input
-                      type="text"
-                      value={operatorNotes}
-                      onChange={(e) => setOperatorNotes(e.target.value)}
-                      className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-neutral-400"
-                      placeholder="Enter operator approval notes..."
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end space-x-3 pt-1">
-                    <button
-                      id="btn-approve-and-execute-replan"
-                      onClick={handleApproveReplan}
-                      disabled={isApplyingReplan || !selectedAlternativeId}
-                      className="px-5 py-2.5 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-xl shadow-lg shadow-black/40 flex items-center space-x-2 transition-all disabled:opacity-50"
-                    >
-                      {isApplyingReplan ? (
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                      )}
-                      <span>Approve & Dispatch AI Replan to Traveler</span>
-                    </button>
-                  </div>
+                <div className="flex items-center justify-end space-x-3 pt-1">
+                  <button
+                    id="btn-dismiss-disruption"
+                    onClick={handleDismissDisruption}
+                    disabled={isDismissing}
+                    className="px-4 py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-xs font-bold rounded-xl border border-neutral-700 flex items-center space-x-2 transition-all disabled:opacity-50"
+                  >
+                    {isDismissing ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <X className="w-4 h-4" />
+                    )}
+                    <span>Dismiss Disruption</span>
+                  </button>
+                  <button
+                    id="btn-approve-and-execute-replan"
+                    onClick={handleApproveReplan}
+                    disabled={isApplyingReplan || !selectedAlternativeId}
+                    className="px-5 py-2.5 bg-white hover:bg-neutral-200 text-black text-xs font-bold rounded-xl shadow-lg shadow-black/40 flex items-center space-x-2 transition-all disabled:opacity-50"
+                  >
+                    {isApplyingReplan ? (
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+                    )}
+                    <span>Approve & Dispatch AI Replan to Traveler</span>
+                  </button>
                 </div>
               </div>
             </div>

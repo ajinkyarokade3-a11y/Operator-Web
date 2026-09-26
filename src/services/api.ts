@@ -420,6 +420,9 @@ export const TourFlowApi = {
     return await parseJsonSafe(res);
   },
 
+  /** @deprecated Use runDisruptionAnalysis instead — the unified
+   * /trips/{id}/disruption-analysis endpoint replaces the old
+   * /impact-analysis + /ai-replan-options pair. */
   async getImpactAnalysis(tripId: string, disruption?: any): Promise<any> {
     const res = await fetch(`${API_BASE}/trips/${tripId}/impact-analysis`, {
       method: 'POST',
@@ -433,6 +436,7 @@ export const TourFlowApi = {
     return await parseJsonSafe(res);
   },
 
+  /** @deprecated Use runDisruptionAnalysis instead. */
   async getAiReplanOptions(tripId: string, disruption?: any): Promise<any> {
     const res = await fetch(`${API_BASE}/trips/${tripId}/ai-replan-options`, {
       method: 'POST',
@@ -446,6 +450,26 @@ export const TourFlowApi = {
     return await parseJsonSafe(res);
   },
 
+  /** Run AI disruption impact analysis. Returns disruption cause, affected
+   * items/bookings/vendors, impact summary, and AI-suggested alternatives.
+   * Does NOT modify the itinerary — use applyReplan to apply a suggestion
+   * or dismissDisruption to reject. */
+  async runDisruptionAnalysis(
+    tripId: string,
+    payload: { alert_id?: string; disruption?: Record<string, any> } = {},
+  ): Promise<any> {
+    const res = await fetch(`${API_BASE}/trips/${encodeURIComponent(tripId)}/disruption-analysis`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.operatorHeaders() },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to run disruption analysis' }));
+      throw new Error(err.detail || 'Failed to run disruption analysis');
+    }
+    return await parseJsonSafe(res);
+  },
+
   async applyReplan(tripId: string, alternativeId: string, notes?: string): Promise<any> {
     const res = await fetch(`${API_BASE}/trips/${tripId}/apply-replan`, {
       method: 'POST',
@@ -455,6 +479,21 @@ export const TourFlowApi = {
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: 'Failed to apply replan' }));
       throw new Error(err.detail || 'Failed to apply replan');
+    }
+    return await parseJsonSafe(res);
+  },
+
+  /** Dismiss a disruption without changing the itinerary. Resolves all
+   * unresolved alerts and records the dismissal in the audit log. */
+  async dismissDisruption(tripId: string, reason?: string): Promise<{ success: boolean; message: string }> {
+    const res = await fetch(`${API_BASE}/trips/${encodeURIComponent(tripId)}/dismiss-disruption`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.operatorHeaders() },
+      body: JSON.stringify({ reason }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Failed to dismiss disruption' }));
+      throw new Error(err.detail || 'Failed to dismiss disruption');
     }
     return await parseJsonSafe(res);
   },
