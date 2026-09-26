@@ -41,32 +41,42 @@ export const OperatorCommunications: React.FC<OperatorCommunicationsProps> = ({
 
   useEffect(() => {
     let cancelled = false;
-    TourFlowApi.getTripMessagesOverview()
-      .then((rows) => {
-        if (cancelled) return;
-        const map: Record<string, TripMessageOverviewEntry> = {};
-        (rows || []).forEach((row) => {
-          map[row.trip_id] = row;
+    let timer: number | undefined;
+    const loadOverviews = () => {
+      if (cancelled) return;
+      TourFlowApi.getTripMessagesOverview()
+        .then((rows) => {
+          if (cancelled) return;
+          const map: Record<string, TripMessageOverviewEntry> = {};
+          (rows || []).forEach((row) => {
+            map[row.trip_id] = row;
+          });
+          setOverview(map);
+        })
+        .catch(() => {
+          if (!cancelled) setOverviewError(true);
         });
-        setOverview(map);
-      })
-      .catch(() => {
-        if (!cancelled) setOverviewError(true);
-      });
-    TourFlowApi.getTripChatOverview()
-      .then((rows) => {
-        if (cancelled) return;
-        const map: Record<string, TravelerChatOverviewEntry> = {};
-        (rows || []).forEach((row) => {
-          map[row.trip_id] = row;
+      TourFlowApi.getTripChatOverview()
+        .then((rows) => {
+          if (cancelled) return;
+          const map: Record<string, TravelerChatOverviewEntry> = {};
+          (rows || []).forEach((row) => {
+            map[row.trip_id] = row;
+          });
+          setChatOverview(map);
+        })
+        .catch(() => {
+          if (!cancelled) setChatOverviewError(true);
         });
-        setChatOverview(map);
-      })
-      .catch(() => {
-        if (!cancelled) setChatOverviewError(true);
-      });
+    };
+    loadOverviews();
+    timer = window.setInterval(() => {
+      if (document.hidden) return;
+      loadOverviews();
+    }, 5000);
     return () => {
       cancelled = true;
+      if (timer !== undefined) window.clearInterval(timer);
     };
   }, []);
 
@@ -204,6 +214,13 @@ export const OperatorCommunications: React.FC<OperatorCommunicationsProps> = ({
                 const internalEntry = overview[trip.id];
                 const chatEntry = chatOverview[trip.id];
                 const isActive = trip.id === selectedTripId;
+                const travelerName = chatEntry?.traveler?.name || trip.traveler?.name || 'Unknown';
+                const travelerEmail = chatEntry?.traveler?.email;
+                const destination = chatEntry?.destination || trip.destination?.name || 'Destination TBD';
+                const origin = chatEntry?.origin || trip.origin;
+                const travelerCount = chatEntry?.traveler_count ?? trip.traveler_count ?? 0;
+                const dateRange = [chatEntry?.start_date, chatEntry?.end_date].filter(Boolean).join(' → ') || trip.formatted_dates || 'Dates TBD';
+                const durationDays = chatEntry?.duration_days ?? trip.duration_days;
                 return (
                   <button
                     key={trip.id}
@@ -231,14 +248,14 @@ export const OperatorCommunications: React.FC<OperatorCommunicationsProps> = ({
                       {trip.title || 'Untitled trip'}
                     </div>
                     <div className="text-[11px] text-neutral-400 mt-1 space-y-0.5">
+                      <div className="font-semibold text-neutral-300">
+                        {travelerName}{travelerEmail ? ` · ${travelerEmail}` : ''}
+                      </div>
                       <div>
-                        {(trip.traveler_count || 0)} traveler{(trip.traveler_count || 0) === 1 ? '' : 's'}
-                        {trip.travel_type ? ` (${trip.travel_type})` : ''} •{' '}
-                        {trip.destination?.name || 'Destination TBD'}
+                        {origin ? `${origin} → ` : ''}{destination} • {travelerCount} traveler{travelerCount === 1 ? '' : 's'}
                       </div>
                       <div className="text-neutral-500">
-                        {trip.formatted_dates || [trip.start_date, trip.end_date].filter(Boolean).join(' → ') || 'Dates TBD'}
-                        {trip.duration_days ? ` • ${trip.duration_days} days` : ''}
+                        {dateRange}{durationDays ? ` • ${durationDays} days` : ''}
                       </div>
                     </div>
                     <div className="flex items-center gap-2 mt-2 text-[11px]">
@@ -267,6 +284,9 @@ export const OperatorCommunications: React.FC<OperatorCommunicationsProps> = ({
                             <span className="px-2 py-0.5 rounded-full font-mono font-bold bg-white text-black text-[10px]">
                               {chatEntry.unread_count} unread
                             </span>
+                          )}
+                          {!chatEntry.chat_enabled && (
+                            <span className="text-neutral-600 text-[10px]">Chat pending</span>
                           )}
                         </>
                       ) : (

@@ -786,6 +786,21 @@ export interface TravelerOperatorChat {
 
 export interface TravelerChatOverviewEntry {
   trip_id: string;
+  title?: string;
+  status?: string;
+  chat_enabled: boolean;
+  chat_state?: string;
+  traveler?: {
+    id: string;
+    name: string | null;
+    email?: string | null;
+  };
+  destination?: string | null;
+  origin?: string | null;
+  traveler_count?: number;
+  start_date?: string | null;
+  end_date?: string | null;
+  duration_days?: number;
   message_count: number;
   unread_count: number;
   latest_at?: string | null;
