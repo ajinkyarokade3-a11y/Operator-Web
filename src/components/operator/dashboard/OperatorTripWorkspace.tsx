@@ -29,6 +29,7 @@ import {
 import { Trip, ItineraryItem, Booking, ChangeHistory } from '../../../types/tourflow';
 import { TourFlowApi } from '../../../services/api';
 import { TripCommunicationsPanel } from '../communications/TripCommunicationsPanel';
+import { TravelerChatPanel } from '../communications/TravelerChatPanel';
 
 interface OperatorTripWorkspaceProps {
   trip: Trip;
@@ -45,7 +46,7 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
   onTriggerDisruptionDemo,
   operatorName,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'bookings' | 'vendors' | 'history' | 'preview' | 'communications'>('itinerary');
+  const [activeTab, setActiveTab] = useState<'overview' | 'itinerary' | 'bookings' | 'vendors' | 'history' | 'preview' | 'communications' | 'traveler_chat'>('itinerary');
   const [isAnalyzingImpact, setIsAnalyzingImpact] = useState(false);
   const [impactAnalysis, setImpactAnalysis] = useState<any | null>(null);
   const [replanOptions, setReplanOptions] = useState<any[]>([]);
@@ -170,6 +171,15 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
         {/* Action Controls */}
         <div className="flex flex-wrap items-center gap-2">
           <button
+            id={`btn-open-traveler-chat-${trip.id}`}
+            onClick={() => setActiveTab('traveler_chat')}
+            title="Open bidirectional chat with the traveler (visible to traveler; enabled after confirmation + approval/acceptance)"
+            className="px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center space-x-1.5 transition-all"
+          >
+            <Send className="w-4 h-4" />
+            <span>Chat with Traveler</span>
+          </button>
+          <button
             id="btn-simulate-disruption-workspace"
             onClick={onTriggerDisruptionDemo}
             className="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center space-x-1.5 transition-all"
@@ -196,7 +206,8 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
           { id: 'bookings', label: `Bookings (${trip.bookings?.length || 0})`, icon: Ticket },
           { id: 'vendors', label: 'Assigned Vendors', icon: Building2 },
           { id: 'history', label: `Audit Log (${trip.change_history?.length || 0})`, icon: History },
-          { id: 'communications', label: 'Communications', icon: MessageSquare },
+          { id: 'communications', label: 'Internal Notes', icon: MessageSquare },
+          { id: 'traveler_chat', label: 'Traveler Chat', icon: Send },
           { id: 'preview', label: 'Traveler View Live', icon: Eye },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -651,14 +662,33 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5">
           <div className="flex items-center justify-between border-b border-neutral-800 pb-3 mb-4">
             <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Trip Communications</h3>
-              <p className="text-xs text-neutral-400">Internal operator log — traveler-invisible.</p>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Internal Notes</h3>
+              <p className="text-xs text-neutral-400">Internal operator log — traveler-invisible. Never shown in Traveler Chat.</p>
             </div>
           </div>
           <TripCommunicationsPanel
-            key={trip.id}
+            key={`internal-${trip.id}`}
             tripId={trip.id}
             operatorName={operatorName || 'operator'}
+          />
+        </div>
+      )}
+
+      {/* TAB CONTENT: TRAVELER CHAT (bidirectional, visible to traveler) */}
+      {activeTab === 'traveler_chat' && (
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5">
+          <div className="flex items-center justify-between border-b border-neutral-800 pb-3 mb-4">
+            <div>
+              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Traveler Chat</h3>
+              <p className="text-xs text-neutral-400">Visible to traveler — separate from internal notes. Enabled after traveler confirmation + operator approval/acceptance.</p>
+            </div>
+          </div>
+          <TravelerChatPanel
+            key={`traveler-chat-${trip.id}`}
+            tripId={trip.id}
+            tripTitle={trip.title}
+            destinationName={trip.destination?.name}
+            travelerName={trip.traveler?.name}
           />
         </div>
       )}
