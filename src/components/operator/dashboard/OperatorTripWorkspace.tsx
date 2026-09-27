@@ -30,6 +30,10 @@ import { Trip, ItineraryItem, Booking, ChangeHistory } from '../../../types/tour
 import { TourFlowApi } from '../../../services/api';
 import { TripCommunicationsPanel } from '../communications/TripCommunicationsPanel';
 import { TravelerChatPanel } from '../communications/TravelerChatPanel';
+import { WeatherCard } from './WeatherCard';
+import { SimulationSection } from './SimulationSection';
+import { SocialSignalsCard } from './SocialSignalsCard';
+import type { WeatherResponse, SocialResponse } from '../../../types/tourflow';
 
 interface OperatorTripWorkspaceProps {
   trip: Trip;
@@ -55,6 +59,50 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
   const [isApplyingReplan, setIsApplyingReplan] = useState(false);
   const [isDismissing, setIsDismissing] = useState(false);
   const [replanSuccessSummary, setReplanSuccessSummary] = useState<any | null>(null);
+  const [weather, setWeather] = useState<WeatherResponse | null>(null);
+  const [weatherLoading, setWeatherLoading] = useState(false);
+  const [social, setSocial] = useState<SocialResponse | null>(null);
+  const [socialLoading, setSocialLoading] = useState(false);
+
+  useEffect(() => {
+    if (!trip.id) return;
+    let cancelled = false;
+    setWeatherLoading(true);
+    setWeather(null);
+    TourFlowApi.getTripWeather(trip.id)
+      .then((data) => {
+        if (!cancelled) setWeather(data);
+      })
+      .catch(() => {
+        if (!cancelled) setWeather({ available: false, reason: 'provider_unavailable' });
+      })
+      .finally(() => {
+        if (!cancelled) setWeatherLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [trip.id]);
+
+  useEffect(() => {
+    if (!trip.id) return;
+    let cancelled = false;
+    setSocialLoading(true);
+    setSocial(null);
+    TourFlowApi.getTripSocialSignals(trip.id)
+      .then((data) => {
+        if (!cancelled) setSocial(data);
+      })
+      .catch(() => {
+        if (!cancelled) setSocial({ available: false, reason: 'provider_unavailable' });
+      })
+      .finally(() => {
+        if (!cancelled) setSocialLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [trip.id]);
 
   // Check if trip has active unresolved disruption
   const activeCriticalAlert = trip.alerts?.find((a) => !a.is_resolved && (a.severity === 'critical' || a.severity === 'warning'));
@@ -281,6 +329,15 @@ export const OperatorTripWorkspace: React.FC<OperatorTripWorkspaceProps> = ({
               </div>
             </div>
           )}
+
+          {/* Live Weather Card */}
+          <WeatherCard weather={weather} loading={weatherLoading} />
+
+          {/* Trip Simulation / What-if */}
+          <SimulationSection tripId={trip.id} />
+
+          {/* Social Signals */}
+          <SocialSignalsCard social={social} loading={socialLoading} />
 
           {/* Replan Success Announcement Banner */}
           {replanSuccessSummary && (
