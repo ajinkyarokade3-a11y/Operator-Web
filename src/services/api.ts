@@ -37,6 +37,12 @@ import {
   TravelerOperatorChat,
   TravelerOperatorChatMessage,
   TravelerChatOverviewEntry,
+  WeatherResponse,
+  SimulationResponse,
+  SocialResponse,
+  SocialData,
+  SocialUnavailable,
+  SocialSignal,
 } from '../types/tourflow';
 import { travelerSession } from './travelerSession';
 import { operatorSession } from './operatorSession';
@@ -1322,5 +1328,36 @@ export const TourFlowApi = {
     } catch {
       // ignore
     }
+  },
+
+  async getTripWeather(tripId: string): Promise<WeatherResponse> {
+    const res = await fetch(`${API_BASE}/trips/${encodeURIComponent(tripId)}/weather`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Weather unavailable' }));
+      throw new Error(err.detail || `Weather request failed for trip: ${tripId}`);
+    }
+    return await parseJsonSafe(res);
+  },
+
+  async simulateTrip(tripId: string, scenario?: string): Promise<SimulationResponse> {
+    const res = await fetch(`${API_BASE}/trips/${encodeURIComponent(tripId)}/simulate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...this.operatorHeaders() },
+      body: JSON.stringify(scenario ? { scenario } : {}),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Simulation failed' }));
+      throw new Error(err.detail || `Simulation failed for trip: ${tripId}`);
+    }
+    return await parseJsonSafe(res);
+  },
+
+  async getTripSocialSignals(tripId: string): Promise<SocialResponse> {
+    const res = await fetch(`${API_BASE}/trips/${encodeURIComponent(tripId)}/social-signals`);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: 'Social signals unavailable' }));
+      throw new Error(err.detail || `Social signals request failed for trip: ${tripId}`);
+    }
+    return await parseJsonSafe(res);
   },
 };

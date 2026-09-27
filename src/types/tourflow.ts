@@ -805,3 +805,136 @@ export interface TravelerChatOverviewEntry {
   unread_count: number;
   latest_at?: string | null;
 }
+
+export interface WeatherCurrent {
+  temperature?: number | null;
+  feels_like?: number | null;
+  humidity?: number | null;
+  precipitation?: number | null;
+  wind_speed?: number | null;
+  condition?: string | null;
+  severity?: string | null;
+}
+
+export interface WeatherForecastItem {
+  timestamp?: string | null;
+  temperature?: number | null;
+  feels_like?: number | null;
+  precipitation?: number | null;
+  wind_speed?: number | null;
+  condition?: string | null;
+  severity?: string | null;
+}
+
+export interface WeatherData {
+  available: boolean;
+  location?: { latitude: number; longitude: number } | null;
+  current?: WeatherCurrent | null;
+  forecast?: WeatherForecastItem[];
+  observed_at?: string | null;
+}
+
+export interface WeatherUnavailable {
+  available: false;
+  reason?: string;
+  error?: { code: string; message: string };
+}
+
+export type WeatherResponse = WeatherData | WeatherUnavailable;
+
+export interface SimulatedAffectedItem {
+  item_id: string;
+  day_number: number;
+  order_index: number;
+  item_type: string;
+  title: string;
+  reason: string;
+  severity: string;
+  impact_type?: string;
+  recommended_action?: string;
+  estimated_delay_minutes?: number | null;
+}
+
+export interface SimulatedDependency {
+  source_item_id: string;
+  source_title: string;
+  target_item_id: string;
+  target_title: string;
+  dependency_type: string;
+  description: string;
+}
+
+export interface SimulatedConflict {
+  item_id: string;
+  item_title: string;
+  conflict_type: string;
+  description: string;
+  severity: string;
+}
+
+export interface SimulationResponse {
+  trip_id: string;
+  weather_context: Record<string, unknown>;
+  scenario?: string | null;
+  affected_items: SimulatedAffectedItem[];
+  all_items?: SimulatedAffectedItem[];
+  dependencies: SimulatedDependency[];
+  conflicts: SimulatedConflict[];
+  replanning_required: boolean;
+  simulation_timestamp: string;
+}
+
+export type SignalType =
+  | 'TRAVELER_REPORT'
+  | 'WEATHER_REPORT'
+  | 'TRANSPORT_REPORT'
+  | 'ROAD_CONDITION'
+  | 'FLIGHT_DISRUPTION'
+  | 'TREND'
+  | 'EMERGING_CONDITION';
+
+export type SourceType = 'SOCIAL' | 'NEWS' | 'OFFICIAL';
+
+export type Sentiment = 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL' | 'MIXED' | 'UNKNOWN';
+
+export type WeatherRelation = 'DIRECT' | 'INDIRECT' | 'NONE' | 'UNKNOWN';
+
+export type Confidence = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface SocialSignal {
+  title?: string | null;
+  summary?: string | null;
+  source?: string | null;
+  category?: string | null;
+  severity?: string | null;
+  observed_at?: string | null;
+  relevance?: string | null;
+  source_type?: SourceType | null;
+  source_url?: string | null;
+  published_at?: string | null;
+  location?: string | null;
+  relevance_score?: number | null;
+  signal_type?: SignalType | null;
+  sentiment?: Sentiment | null;
+  weather_relation?: WeatherRelation | null;
+  confidence?: Confidence | null;
+}
+
+export interface SocialData {
+  available: true;
+  signals: SocialSignal[];
+  overall_risk?: string | null;
+  observed_at?: string | null;
+  sources?: string[];
+  generated_at?: string | null;
+  status?: string | null;
+  total?: number | null;
+}
+
+export interface SocialUnavailable {
+  available: false;
+  reason?: string;
+  error?: { code: string; message: string };
+}
+
+export type SocialResponse = SocialData | SocialUnavailable;
